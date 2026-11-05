@@ -117,7 +117,7 @@ func (c *Collector) collectHwmon() ([]TempReading, []FanReading) {
 				pwm = readInt64(filepath.Join(dir, "pwm"+num))
 			}
 			fans = append(fans, FanReading{
-				Key: claimUniqueKey(sanitizeKey(name+"_"+stem), fanKeys), Label: label, RPM: int(rpm), PWM: int(pwm),
+				Key: claimUniqueKey(sanitizeKey(name+"_"+stem), fanKeys), Label: label, RPM: clampInt(rpm), PWM: clampInt(pwm),
 			})
 		}
 	}
