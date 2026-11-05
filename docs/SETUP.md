@@ -187,6 +187,12 @@ The dashboard is HTTP by design for direct LAN/VPN use. Do not port-forward it t
 
 ## 6. Install the Android app
 
+### Join the Google Play closed test
+
+To install through Google Play while the app is in closed testing, [request access with the signup form](https://forms.gle/7LxUcDdEPudx7pb3A) using the Google email address for your Play Store account. If the form is unavailable, email <nas.closed.beta.numeric688@passmail.net> with your Google Play email address.
+
+Access is granted by the maintainer in Play Console. After approval, accept the Play tester opt-in link with that same account before installing. Do not send NAS addresses, tokens, logs, serials, or configured-NAS screenshots with a signup. The signed GitHub APK below needs no tester enrollment.
+
 ### Explore without a server
 
 On first launch choose **Explore synthetic demo**. This locally generated, clearly labeled preview needs no NAS, internet connection, or credentials. It is suitable for trying navigation, charts, logs, and notification controls. Actions are disabled. It does not demonstrate real host health or hardware compatibility.

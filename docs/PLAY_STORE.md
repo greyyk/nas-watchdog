@@ -42,7 +42,7 @@ A stable `vX.Y.Z` tag runs build/test/lint, produces:
 - `nas-watchdog-<version>-android.apk` — direct-install artifact, same signing identity.
 - `nas-watchdog-<version>-play.aab` — signed upload artifact for Play Console.
 - `SHA256SUMS.txt` — checksums for **both** app artifacts.
-- `ghcr.io/greyyk/nas-watchdog:<version>` and `:latest` — public Linux AMD64 watchdog image.
+- `ghcr.io/greyyk/nas-watchdog:<version>` and `:latest` — public Linux x86-64 (`linux/amd64`) watchdog image.
 
 APK verification uses `apksigner`; AABs use `jarsigner`/JAR certificate inspection because `apksigner` does not apply to bundles. Artifacts are uploaded only after Android, Go, and container checks succeed. Publishing to GitHub never automatically uploads or pushes a production release to Play.
 
@@ -59,9 +59,25 @@ There is intentionally no Play API credential or automatic production deployment
 - [ ] Complete the **foreground service `specialUse`** declaration and demonstration described in [review-notes.md](../play/review-notes.md).
 - [ ] Explain that a separately configured server and hardware are required. Do not misrepresent sample screenshots/demo data as live real-user health.
 - [ ] Test installation and upgrades on your own actual Android 8+ and Android 14/16-class devices where possible; test connection refusal, retry,SSE reconnect, notifications, stopped monitoring, rotation, battery/background restrictions, no sensors, and stale snapshots.
-- [ ] Start in **Internal testing**. Add your own testers through the track and install the Play-delivered artifact—not merely the GitHub APK—to verify Play App Signing and app behavior.
+- [ ] Use **Internal testing** for your own initial install checks where possible, then **Closed testing** for external testers. Add approved tester emails through the track and install the Play-delivered artifact—not merely the GitHub APK—to verify Play App Signing and app behavior.
 - [ ] Review Play's current tester requirement for your account type/creation date. Newer qualifying personal accounts may require 12 opted-in closed testers continuously for 14 days before production access.
 - [ ] Submit only after all blocking Console dashboard/policy tasks and real-device checks are addressed. Managed publishing can separate approval from a deliberate production go-live.
+
+## Closed-testing signup and tester onboarding
+
+Public signup: **<https://forms.gle/7LxUcDdEPudx7pb3A>**. Fallback email: <nas.closed.beta.numeric688@passmail.net>. Keep this page and the README in sync if either changes.
+
+The maintainer must:
+
+1. Review each form response for a plausible Google Play account email. The form currently has a yes/no closed-test question; do not treat “No” as a tester request.
+2. In **Test and release → Testing → Closed testing → Manage track → Testers**, add the approved account to an email list. The form email must match the Google account the tester will use to accept the test.
+3. Provide a feedback contact on the track, then copy the **tester opt-in link** and send it to the approved tester through the channel they provided.
+4. Tell testers that approval alone is not enough: they must open that link, accept the test with the same account, and only then install the Play-delivered app.
+5. Test with your own approved account after enrollment. Confirm the installed app was delivered by Play and inspect its actual signer as described in the signing section.
+6. Remove testers or delete signup responses on request, and keep the signup/fallback addresses covered by the privacy policy.
+7. Do not publish tester email addresses, leave unapproved responses in an unprotected public spreadsheet, or promise immediate access. Signup is a request; Play Console, country, account type, device, and tester-count rules still apply.
+
+Google Forms and email delivery are run by their providers, not by the app. Only the Google Play account email, the closed-test answer, and any optional feedback or contact information the tester chooses to provide should be requested.
 
 ## Rejections and safe recovery
 

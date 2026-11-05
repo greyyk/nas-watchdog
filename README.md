@@ -10,13 +10,27 @@ Community-developed for compatible Intel/AMD x86-64 NAS systems, with the primar
 [![D8U validation wanted](https://img.shields.io/badge/D8U-validation%20wanted-e9b949)](#model-support)
 [![Docker · Linux AMD64](https://img.shields.io/badge/Docker-Linux%2FAMD64-2496ED)](#quick-start)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84)](#android-app)
+[![Google Play closed test](https://img.shields.io/badge/Google%20Play-closed%20test-3DDC84)](https://forms.gle/7LxUcDdEPudx7pb3A)
 [![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 > **Built for Zettlab Ultra. Tuned for ZettOS.** D6 Ultra (D6U) has been live-tested on ZettOS; D8 Ultra (D8U) needs owner validation. **D4 and D6 ARM models are not supported yet.** Running another OS on your D6U/D8U? The Docker service can also be adapted to other **x86-64 Linux** installations (`amd64` in Docker/Go); see the [non-ZettOS guide](docs/OTHER_LINUX.md). Hardware reports and well-tested contributions are welcome.
 
-**[Install on ZettOS](docs/SETUP.md) · [Download APK / Play AAB](https://github.com/greyyk/nas-watchdog/releases/latest) · [Google Play guide](docs/PLAY_STORE.md) · [Container image](#published-containers) · [Privacy](PRIVACY.md)**
+**[Install on ZettOS](docs/SETUP.md) · [Join the Google Play closed test](https://forms.gle/7LxUcDdEPudx7pb3A) · [Download APK](https://github.com/greyyk/nas-watchdog/releases/latest) · [Container image](#published-containers) · [Privacy](PRIVACY.md)**
 
 The embedded dashboard and Android app now share a responsive instrument-style interface: clear health hierarchy, history ranges, component thermals, connectivity feedback, and guarded controls. The in-app synthetic demo provides safe screenshots and Play review access without a real NAS credential.
+
+## Google Play closed testing
+
+Want the Android app through **Google Play** while it is still in closed testing? **[Request access with this short signup form](https://forms.gle/7LxUcDdEPudx7pb3A)**.
+
+1. Enter the **Google email address associated with your Play Store account**—the one you use on the Android device where you want to install NAS Watchdog.
+2. The maintainer reviews requests and adds approved testers in Play Console. **You cannot install from Play until you receive the tester opt-in link and accept it with that same Google account.**
+3. After approval, open the Play tester link and opt in within the closed test, then install NAS Watchdog from Google Play. Play may take a while to make a new tester link available.
+4. Send feedback through the project issue tracker or the feedback contact shown on the Play tester page.
+
+If the form is unavailable, email **<nas.closed.beta.numeric688@passmail.net>** with the subject **“NAS Watchdog Play closed test”** and your Google Play email address. Do not include NAS addresses, API tokens, logs, serials, or screenshots from a configured NAS.
+
+Closed-test signups are requests, not automatic enrollment or availability guarantees. The tester list is controlled by the maintainer, and Google Play may impose country, account, device, or tester-count requirements. The [signed GitHub APK](https://github.com/greyyk/nas-watchdog/releases/latest) remains available without joining the test; see [Android installation](docs/SETUP.md#6-install-the-android-app).
 
 ## Highlights
 
@@ -124,6 +138,8 @@ The Android client includes live telemetry, last-good offline snapshots, CPU and
 
 Each tagged release publishes a **signed release APK plus a Play-compatible signed AAB and SHA-256 checksums** through the [Release workflow](.github/workflows/release.yml). The direct APK preserves its existing signing identity; Play uses a separate upload key and Play App Signing. See [release installation](docs/RELEASING.md) and the [Google Play publication guide](docs/PLAY_STORE.md).
 
+For the Google Play closed test, **[request tester access](https://forms.gle/7LxUcDdEPudx7pb3A)** with your Play Store email. You can also install the signed GitHub APK without joining the test.
+
 ### Build
 
 On a workstation with **JDK 17** and the Android SDK:
@@ -186,7 +202,7 @@ To use a pinned release instead of a local build, set `WATCHDOG_IMAGE=ghcr.io/gr
 - **[Other Linux operating systems](docs/OTHER_LINUX.md)**
 - **[Compatibility and hardware discovery](docs/COMPATIBILITY.md)**
 - **[Configuration reference](docs/CONFIGURATION.md)**
-- **[Google Play publication](docs/PLAY_STORE.md)** · store text, signing, privacy, review/demo, and asset package
+- **[Google Play publication](docs/PLAY_STORE.md)** · store text, signing, closed-test signup/tester onboarding, privacy, review/demo, and asset package
 - **[Privacy policy](PRIVACY.md)** · actual local/server data flows, removal, and security
 - **[Third-party names and independence](TRADEMARKS.md)** · unofficial status and original-brand safeguards
 - **[HTTP API](docs/API.md)**

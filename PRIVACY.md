@@ -15,6 +15,12 @@ Views that show host logs can include information written by other software on y
 
 The **Explore synthetic demo** button uses only data generated inside the app on your device. It contacts no NAS, internet service, or developer endpoint, and its actions are disabled. Its local cache is subject to the same removal controls below.
 
+## Google Play closed-testing signup
+
+Joining the optional Google Play closed test is separate from using the app. If you submit the [tester signup form](https://forms.gle/7LxUcDdEPudx7pb3A), Google Forms processes the **Google Play email address** you enter and is subject to Google's terms and privacy policy. The maintainer uses that address only to review your request and, if approved, add it to the Play Console tester list. The address is not added to an advertising list. You can ask for removal from the tester list or for deletion of the signup response through the contact channel below.
+
+This optional signup is not required to use the synthetic demo, the signed GitHub APK, or any self-hosted watchdog feature. Do not provide NAS credentials or telemetry in the form or fallback email.
+
 ## Developer collection, analytics, advertising, and sharing
 
 The NAS Watchdog software in this repository contains **no developer-operated telemetry endpoint, advertising SDK, analytics SDK, account system, crash-reporting SDK, or tracking identifier**. The project developer does not receive your NAS address, API token, telemetry, logs, or alerts through the app's normal operation.
@@ -47,6 +53,6 @@ This utility is not directed to children. It has no social features or advertisi
 
 ## Contact
 
-For privacy questions or corrections, use the public project issue tracker at <https://github.com/greyyk/nas-watchdog/issues> after removing all secrets and private telemetry. Google Play users may also use the support contact shown on the store listing. Do not email or post your API token, logs, or a raw stats response.
+For privacy questions, corrections, or removal of a closed-testing signup, email <nas.closed.beta.numeric688@passmail.net> with the subject **“NAS Watchdog privacy”**. For non-private questions, use the public project issue tracker at <https://github.com/greyyk/nas-watchdog/issues> after removing all secrets and private telemetry. Google Play users may also use the support contact shown on the store listing. Do not email or post your API token, logs, or a raw stats response.
 
 This policy describes the provided source and release configuration; a fork, modified build, separately hosted service, or third-party network product may behave differently.
