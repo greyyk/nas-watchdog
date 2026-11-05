@@ -37,6 +37,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Port of the JDK used by the regular CI Android job. CodeQL init replaces
+      # JAVA_HOME for the traced build, so Gradle no longer sees the runner JDK.
+      - name: Install build JDK
+        if: matrix.language == 'java-kotlin'
+        run: |
+          jdk=/usr/lib/jvm/temurin-17-jdk-amd64
+          if [ ! -x "$jdk/bin/java" ]; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq temurin-17-jdk
+          fi
+          echo "JAVA_TOOL_OPTIONS=-Dorg.gradle.java.home=$jdk" >> "$GITHUB_ENV"
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
