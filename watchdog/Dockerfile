@@ -6,7 +6,7 @@ COPY *.go ./
 COPY ui ./ui
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /out/watchdog .
 
-FROM alpine:3.23
+FROM alpine:3.24
 ARG VERSION=1.5.1
 LABEL org.opencontainers.image.title="NAS Watchdog" \
       org.opencontainers.image.description="Independent NAS host telemetry, thermal monitoring, alerts, web dashboard, and Android client" \
