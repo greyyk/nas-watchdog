@@ -45,7 +45,7 @@ Delete or rotate an exposed token through your watchdog `.env`, then update/reco
 
 ## Security and network use
 
-Use a long random token and a trusted LAN or VPN; do not expose the HTTP watchdog port directly to the internet. Direct LAN monitoring can use HTTP when your device and server allow a private connection. Use a properly configured HTTPS reverse proxy for stronger transport security where appropriate. Privileged host access and the Docker socket are powerful; see the [security guidance](docs/SETUP.md#8-security-and-remote-actions).
+Use a long random token and a trusted LAN or VPN; do not expose the HTTP watchdog port directly to the internet. Direct LAN monitoring can use HTTP when your device and server allow a private connection. Use a properly configured HTTPS reverse proxy where appropriate. The container has privileged host access and the Docker socket, so keep them private; see the [security guidance](docs/SETUP.md#8-security-and-remote-actions).
 
 ## Children and changes
 

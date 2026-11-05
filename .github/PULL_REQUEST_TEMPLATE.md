@@ -9,7 +9,7 @@
 ## Verification
 
 - [ ] `cd watchdog && go test -race ./... && go vet ./...`
-- [ ] Docker AMD64 build and Compose config validated (for backend/config changes)
+- [ ] Docker x86-64 (`linux/amd64`) build and Compose config validated (for backend/config changes)
 - [ ] `cd android && ./gradlew testDebugUnitTest lintDebug assembleDebug` (for app changes)
 - [ ] Real hardware behavior checked, or explicitly listed as not tested below
 - [ ] Documentation/support matrix updated for behavior or configuration changes

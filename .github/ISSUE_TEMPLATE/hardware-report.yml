@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for helping cover more than one NAS layout. Please use `sh scripts/hardware-report.sh > hardware-report.txt` on the NAS, then **review and redact the result**. Never attach `.env`, tokens, notification topics/URLs, raw `/stats`, SMART serials, host logs, MAC/IP addresses, or process arguments.
+        Please run `sh scripts/hardware-report.sh > hardware-report.txt` on the NAS, then review and redact the result. Never attach `.env`, tokens, notification topics or URLs, raw `/stats`, SMART serials, host logs, MAC or IP addresses, or process arguments.
   - type: dropdown
     id: model
     attributes:

@@ -1,10 +1,10 @@
 # Contributing
 
-Thanks for helping make NAS Watchdog useful beyond one D6U installation. The most valuable contributions are real hardware validation, safe collector fixes, focused tests, and clear documentation.
+Thanks for helping make NAS Watchdog useful beyond one D6U installation. The most useful contributions are hardware validation, careful collector fixes, focused tests, and clear documentation.
 
 ## Ground rules
 
-- Keep hardware development focused on compatible **Zettlab NAS** systems and the primary **ZettOS** experience. Generic AMD64 Linux adaptations are welcome, but must not regress or complicate the validated ZettOS path. This is an independent project: use third-party names only for factual compatibility and never claim endorsement or official status.
+- Keep hardware development focused on compatible **Zettlab NAS** systems and the primary **ZettOS** experience. Other x86-64 Linux adaptations are welcome, but must not regress the validated ZettOS path. Use third-party names only for factual compatibility; never claim endorsement or official status.
 - Preserve existing API fields and Android compatibility unless a versioned change is genuinely necessary.
 - Discover what the kernel/Docker exposes instead of hardcoding one owner’s bay counts, hwmon indexes, drive names, fan count, or applications.
 - Treat missing hardware and optional capabilities as normal. Do not invent substitute readings.
@@ -17,7 +17,7 @@ Thanks for helping make NAS Watchdog useful beyond one D6U installation. The mos
 
 ### Watchdog
 
-The Go service has no third-party Go dependencies. The Docker build uses Go 1.23 and Alpine. Unit tests use synthetic sysfs/SMART fixtures and do not need a NAS:
+The Go service has no third-party Go dependencies. The Docker build uses the Go and Alpine versions pinned in `Dockerfile`. Unit tests use synthetic sysfs/SMART fixtures and do not need a NAS:
 
 ```sh
 cd watchdog

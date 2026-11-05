@@ -1,157 +1,99 @@
 # NAS Watchdog
 
-**Independent NAS monitoring with a live web dashboard, Android companion, and alerts that explain what actually happened.**
+**Self-hosted monitoring for a NAS: storage health, component thermals, history, Docker inventory, and alerts.**
 
-Community-developed for compatible Intel/AMD x86-64 NAS systems, with the primary experience tuned for Zettlab D6 Ultra/D8 Ultra running ZettOS. It catches what ordinary uptime checks miss: a btrfs pool forced read-only, a marginal DIMM, a hot NVMe controller, a stopped fan, unhealthy drives, or a container that is present but no longer running.
+NAS Watchdog is an independent project for compatible Intel/AMD x86-64 Linux systems, primarily the Zettlab D6 Ultra and D8 Ultra running ZettOS. It reports a btrfs pool forced read-only, a hot NVMe controller, a stopped fan, an unhealthy disk, or a stopped container, and keeps enough history to show when it changed.
 
-> **Unofficial and independent.** NAS Watchdog is not affiliated with, sponsored by, authorized by, or endorsed by Zettlab or any other NAS manufacturer. Third-party names appear only as factual compatibility references. See [Third-party names and independence](TRADEMARKS.md).
+[Docker image](#quick-start) · [Android app](#android-app) · [Download APK](https://github.com/greyyk/nas-watchdog/releases/latest) · [Google Play closed test](https://forms.gle/7LxUcDdEPudx7pb3A) · [Documentation](#documentation)
 
-[![D6U tested](https://img.shields.io/badge/D6U-tested-35c58b)](#model-support)
-[![D8U validation wanted](https://img.shields.io/badge/D8U-validation%20wanted-e9b949)](#model-support)
-[![Docker · Linux AMD64](https://img.shields.io/badge/Docker-Linux%2FAMD64-2496ED)](#quick-start)
-[![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84)](#android-app)
-[![Google Play closed test](https://img.shields.io/badge/Google%20Play-closed%20test-3DDC84)](https://forms.gle/7LxUcDdEPudx7pb3A)
-[![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+![NAS Watchdog dashboard showing a synthetic overview with live status, CPU utilisation, and alert history](play/assets/web-overview.png)
 
-> **Built for Zettlab Ultra. Tuned for ZettOS.** D6 Ultra (D6U) has been live-tested on ZettOS; D8 Ultra (D8U) needs owner validation. **D4 and D6 ARM models are not supported yet.** Running another OS on your D6U/D8U? The Docker service can also be adapted to other **x86-64 Linux** installations (`amd64` in Docker/Go); see the [non-ZettOS guide](docs/OTHER_LINUX.md). Hardware reports and well-tested contributions are welcome.
+The dashboard above is running on locally generated sample data. The Android app uses the same instrument-style design.
 
-**[Install on ZettOS](docs/SETUP.md) · [Join the Google Play closed test](https://forms.gle/7LxUcDdEPudx7pb3A) · [Download APK](https://github.com/greyyk/nas-watchdog/releases/latest) · [Container image](#published-containers) · [Privacy](PRIVACY.md)**
-
-The embedded dashboard and Android app now share a responsive instrument-style interface: clear health hierarchy, history ranges, component thermals, connectivity feedback, and guarded controls. The in-app synthetic demo provides safe screenshots and Play review access without a real NAS credential.
-
-## Google Play closed testing
-
-Want the Android app through **Google Play** while it is still in closed testing? **[Request access with this short signup form](https://forms.gle/7LxUcDdEPudx7pb3A)**.
-
-1. Enter the **Google email address associated with your Play Store account**—the one you use on the Android device where you want to install NAS Watchdog.
-2. The maintainer reviews requests and adds approved testers in Play Console. **You cannot install from Play until you receive the tester opt-in link and accept it with that same Google account.**
-3. After approval, open the Play tester link and opt in within the closed test, then install NAS Watchdog from Google Play. Play may take a while to make a new tester link available.
-4. Send feedback through the project issue tracker or the feedback contact shown on the Play tester page.
-
-If the form is unavailable, email **<nas.closed.beta.numeric688@passmail.net>** with the subject **“NAS Watchdog Play closed test”** and your Google Play email address. Do not include NAS addresses, API tokens, logs, serials, or screenshots from a configured NAS.
-
-Closed-test signups are requests, not automatic enrollment or availability guarantees. The tester list is controlled by the maintainer, and Google Play may impose country, account, device, or tester-count requirements. The [signed GitHub APK](https://github.com/greyyk/nas-watchdog/releases/latest) remains available without joining the test; see [Android installation](docs/SETUP.md#6-install-the-android-app).
-
-## Highlights
-
-| Area | What you get |
+| | |
 |---|---|
-| **Storage truth** | Pool read/write state, btrfs corruption and allocation, scrubs, RAID, bcache, per-disk I/O, full SMART attributes |
-| **Complete thermals** | Every exposed hwmon temperature, per-core CPU readings, DIMMs, all populated SATA/NVMe devices, board sensors, hardware limits/alarms, thermal trips, fan RPM/PWM |
-| **Interactive history** | 5m/1h/6h/24h charts, exact samples, min/average/max/change, threshold exposure, cooling response |
-| **Actual Docker inventory** | Automatically discovers all containers, health, resources, ports, and logs; expected-container alerts are opt-in |
-| **Alerts that explain** | ntfy, generic webhooks, Android notifications, and an external dead-man’s heartbeat |
-| **Guarded actions** | Opt-in Docker controls, btrfs scrub operations, and reboot recovery—disabled by default |
-| **Two native interfaces** | Embedded responsive web dashboard and a Material 3 / Compose Android app |
+| **Supported platform** | Linux x86-64 (`linux/amd64`); D6 Ultra tested on ZettOS |
+| **NAS diagnostics** | btrfs pools, RAID, SMART, per-device I/O, hwmon thermals, fans |
+| **Delivered as** | Docker container with an embedded web UI; Android app |
+| **Alerts** | ntfy, generic webhooks, dead-man's heartbeat, Android notifications |
+| **Remote actions** | Opt-in and disabled by default |
+| **License** | [MIT](LICENSE) |
+
+## Features
+
+- **Storage:** pool read/write state, btrfs corruption and allocation, scrubs, RAID, bcache, per-disk I/O, and full SMART attributes.
+- **Thermals:** every temperature the kernel exposes, including per-core CPU readings, DIMMs, populated SATA/NVMe devices, board sensors, hardware limits, thermal trips, and fan RPM/PWM.
+- **History:** 5-minute, 1-hour, 6-hour, and 24-hour charts with exact samples, minimum/average/maximum, change, and threshold exposure.
+- **Docker:** discovers all containers, their health, resources, ports, and logs. Expected-container alerts are opt-in.
+- **Alerts:** ntfy, generic webhooks, Android notifications, and an external heartbeat.
+- **Actions:** Docker controls, btrfs scrub operations, and reboot recovery. All are opt-in and disabled by default.
 
 No external metrics server, account, Firebase project, or chart service is required. The Go backend uses only the standard library and serves its UI directly from the container.
 
-## Model support
+## Hardware support
 
 | Model | Architecture | Status |
 |---|---|---|
-| **D6 Ultra (D6U)** | Intel Core Ultra 5 125H / x86-64 (`linux/amd64`) | **Tested** against a live ZettOS system |
-| **D8 Ultra (D8U)** | Intel Core Ultra 5 125H / x86-64 target (`linux/amd64`) | **Expected compatible; hardware validation wanted** |
-| **D6 / D4** | RK3588 ARM | **Not supported in this release**; see the [contribution path](docs/COMPATIBILITY.md#arm-contributions) |
+| **D6 Ultra (D6U)** | Intel Core Ultra 5 125H / x86-64 (`linux/amd64`) | Tested on a live ZettOS system |
+| **D8 Ultra (D8U)** | Intel Core Ultra 5 125H / x86-64 (`linux/amd64`) | Expected compatible; hardware validation wanted |
+| **D4 and D6** | RK3588 ARM | Not supported in this release |
 
-Sensor availability is firmware and kernel dependent. The watchdog reports what the host actually exposes; it never fabricates missing GPU, UPS, PSU, IPMI, fan, or drive readings. See **[Compatibility and hardware discovery](docs/COMPATIBILITY.md)** for exact behavior and a D8U validation checklist.
+Sensor availability depends on firmware and kernel support. The watchdog reports what the host exposes and never substitutes readings for missing GPU, UPS, PSU, IPMI, fan, or drive data.
+
+Other x86-64 Linux distributions are usable with adaptation; see the [other-Linux notes](docs/OTHER_LINUX.md). Exact discovery behavior and the D8U validation checklist are in [Compatibility](docs/COMPATIBILITY.md).
+
+## Android closed test
+
+The Android app is in Google Play closed testing. To request access, [fill in the signup form](https://forms.gle/7LxUcDdEPudx7pb3A) with the Google account email you use on your Play-enabled device. If the form is unavailable, email <nas.closed.beta.numeric688@passmail.net>. Please don't include NAS addresses, tokens, logs, or serials.
+
+Approved testers receive a Play tester link and must accept it with that same account before the app appears on Google Play. Signup is a request, not automatic enrollment; Play's country, account, and tester-count rules still apply. The signed GitHub APK needs no enrollment.
+
+## Independence
+
+NAS Watchdog is not affiliated with, sponsored by, authorized by, or endorsed by Zettlab or any other NAS manufacturer. Third-party names are used only to describe compatibility. See [Third-party names and independence](TRADEMARKS.md).
 
 ## Quick start
 
-### 1. Enable ZettOS SSH
-
-Sign in to ZettOS as an administrator and open **Settings → Security → SSH**. Enable SSH, note the configured port, then connect from your workstation:
-
-```sh
-ssh <your-zettos-user>@<nas-ip>
-# If you selected a non-default port:
-ssh -p <ssh-port> <your-zettos-user>@<nas-ip>
-```
-
-Menu names can vary by ZettOS release; the current reference is the **[official security/SSH guide](https://wiki.zettlab.com/?page=apps%2Fsettings%2Fsecurity&locale=en-US)**. Use an administrator account with permission to run `sudo docker`.
-
-### 2. Check the built-in Docker support
-
-ZettOS already includes Docker support, so there is normally **nothing to install**. Open the Docker app once to confirm it is available, then verify the CLI and host architecture over SSH:
+1. Enable SSH in ZettOS under **Settings → Security → SSH**, then connect with an administrator account.
+2. Confirm Docker is available, the host is x86-64, and locate the btrfs pool.
+3. Copy this repository to persistent storage, create `.env`, and set `WD_API_TOKEN` to a value from `openssl rand -hex 32`.
+4. Run `sudo docker compose up -d --build`, then open `http://<nas-ip>:8090`.
 
 ```sh
 uname -m                   # expected: x86_64
-sudo docker --version
 sudo docker compose version
-
 findmnt -t btrfs -o TARGET,SOURCE,OPTIONS
-# The known ZettOS default pool path is /zettos/pool/1.
 ```
 
-For Docker’s ZettOS interface and Compose concepts, see the **[official Docker overview](https://wiki.zettlab.com/?page=apps%2Fdocker&locale=en-US)** and **[Compose guide](https://wiki.zettlab.com/?page=apps%2Fdocker%2Fcompose&locale=en-US)**. This project’s validated deployment path is SSH + Docker Compose CLI because it uses a local `.env`, a privileged container, and host-wide read-only mounts.
+Set `POOL_HOST_PATH` in `.env` if the pool is not mounted at the default `/zettos/pool/1`. The Compose file requires a non-empty API token; actions, automatic reboot, and expected-container alerts are off by default. Do not expose the HTTP service directly to the internet.
 
-### 3. Configure
+The [setup guide](docs/SETUP.md) covers verification, notifications, Android, updates, and troubleshooting. [Other-Linux notes](docs/OTHER_LINUX.md) explain what needs checking outside ZettOS.
 
-Place this repository somewhere persistent on ZettOS storage (for example under `/zettos/raid/`, not `/tmp`), using Git if installed or by downloading the repository and copying it over SSH/SFTP. Then:
+## Hardware discovery
 
-```sh
-cd /persistent/path/<repository>/watchdog
-cp .env.example .env
-openssl rand -hex 32
-```
+There are no fixed disk, NVMe, or fan counts:
 
-Paste the generated value into `WD_API_TOKEN` in `.env`, then protect the file:
+- **SATA:** whole `sd*` block devices are discovered from `/sys/block`; every populated slot with a valid SMART temperature is included. Tests cover all eight SATA positions and non-disk exclusions.
+- **NVMe:** controllers and channels follow the resolved hwmon sysfs path, not enumeration order.
+- **CPU:** `coretemp` package/core labels map to physical core IDs and logical CPUs. Intel P/E topology is used when the kernel exposes it; otherwise the hottest core remains the CPU reading.
+- **Memory, board, and cooling:** DIMM SPD sensors, other hwmon chips, thermal zones, fans, and PWM channels appear when available. A stopped fan remains visible at 0 RPM; an absent device creates no placeholder.
+- **Docker:** inventory is read from the Docker API on every collection. `WD_EXPECTED_CONTAINERS` alerts only for containers you nominate.
 
-```sh
-chmod 600 .env
-```
-
-Review `POOL_HOST_PATH` if your pool is not mounted at `/zettos/pool/1`. All other settings—including notification destinations, thresholds, and expected containers—are documented in [`.env.example`](watchdog/.env.example) and the [configuration reference](docs/CONFIGURATION.md).
-
-> The supplied Compose file **requires a non-empty API token**. Actions, automatic reboot, and expected-container alerts are off by default.
-
-### 4. Run
-
-```sh
-sudo docker compose up -d --build
-sudo docker compose ps
-sudo docker compose logs --tail=50 watchdog
-```
-
-Open `http://<nas-ip>:8090` and enter the token when prompted. Do not expose this HTTP service directly to the internet; use your trusted LAN or an existing VPN.
-
-**[Full ZettOS setup, verification, notifications, Android, and troubleshooting →](docs/SETUP.md)**
-
-> **Not running ZettOS?** Use the **[other-Linux installation notes](docs/OTHER_LINUX.md)**. The AMD64 container is portable, but distro-specific hosts, pool paths, and recovery actions need validation.
-
-## Hardware that adapts to the NAS
-
-There are no fixed three-disk, two-NVMe, or three-fan assumptions:
-
-- **SATA:** whole `sd*` block devices are discovered from `/sys/block`; every populated slot with a valid SMART temperature is included. The tests exercise all eight SATA positions plus non-disk exclusions.
-- **NVMe:** controllers and sensor channels come from the resolved hwmon sysfs path, not hwmon enumeration order. One or two controllers—and additional channels per controller—are represented independently.
-- **CPU:** `coretemp` package/core labels are mapped to actual physical core IDs and logical CPUs. Intel P/E topology is added when the kernel exposes it. A hottest-core fallback keeps the legacy CPU reading available if no package sensor exists.
-- **Memory and board:** supported DIMM SPD sensors, other hwmon chips, extra board channels, and thermal zones are optional. Empty slots and missing devices produce no placeholder readings.
-- **Cooling:** fan inputs from any hwmon driver are collected, including stopped fans at 0 RPM. PWM and valid hardware limits/alarms are included when available.
-- **Docker:** inventory comes from the Docker API on every collection. Add `WD_EXPECTED_CONTAINERS` only for services that should alert when missing or stopped.
-
-Missing capabilities remain visible as **not reported**, not as zero-valued hardware that never existed.
+Unsupported or hidden readings appear as **not reported**, never as manufactured zeros. Details are in [Compatibility](docs/COMPATIBILITY.md).
 
 ## Android app
 
 The Android client includes live telemetry, last-good offline snapshots, CPU and thermal instruments, storage/SMART details, Docker controls and logs, network information, alert history, and guarded actions.
 
-Each tagged release publishes a **signed release APK plus a Play-compatible signed AAB and SHA-256 checksums** through the [Release workflow](.github/workflows/release.yml). The direct APK preserves its existing signing identity; Play uses a separate upload key and Play App Signing. See [release installation](docs/RELEASING.md) and the [Google Play publication guide](docs/PLAY_STORE.md).
+Each release publishes a signed APK, a Play-compatible AAB, and SHA-256 checksums through the [Release workflow](.github/workflows/release.yml). The direct APK keeps its existing signing identity; Play uses a separate upload key and Play App Signing. See [release installation](docs/RELEASING.md) and the [Google Play guide](docs/PLAY_STORE.md).
 
-For the Google Play closed test, **[request tester access](https://forms.gle/7LxUcDdEPudx7pb3A)** with your Play Store email. You can also install the signed GitHub APK without joining the test.
+### Building from source
 
-### Build
-
-On a workstation with **JDK 17** and the Android SDK:
+With JDK 17 and the Android SDK:
 
 ```sh
 cd android
 ./gradlew assembleDebug
-```
-
-Install `app/build/outputs/apk/debug/app-debug.apk` with Android Studio, by copying it to the phone, or with:
-
-```sh
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
@@ -168,15 +110,14 @@ Temperature alerts are grouped per CPU and per NVMe controller to prevent one ho
 
 ## Security and permissions
 
-This is a high-trust host agent, not an ordinary unprivileged container:
+This is a privileged host agent. Understand the trust boundary before deploying it:
 
-- `/` is mounted **read-only** at `/host`; the pool is mounted **read-only** at `/pool`.
-- `privileged: true` enables raw-device SMART access.
-- `pid: host` is required for an accurate host mount table and host-namespace diagnostics.
-- The Docker socket can control every container. Mutating API actions still require `WD_ALLOW_ACTIONS=true`, but anyone who compromises the container process could reach the socket directly.
-- Remote actions always require both the feature flag and request confirmation. Automatic reboot is separately guarded by delay, cooldown, and reboot-loop suppression.
+- The host and pool are mounted read-only at `/host` and `/pool`.
+- `privileged: true` is needed for raw-device SMART access; `pid: host` gives accurate host mount and namespace information.
+- The Docker socket can control every container. Mutating API calls also require `WD_ALLOW_ACTIONS=true`, but a compromised container process could use the socket directly.
+- Remote actions require the feature flag and request confirmation. Automatic reboot adds delay, cooldown, and reboot-loop suppression.
 
-Use a long random token, keep `.env` private, patch and review updates, and keep the service behind your LAN/VPN boundary. Read the [security section in the setup guide](docs/SETUP.md#security-and-remote-actions).
+Use a long random token, keep `.env` private, review updates, and stay behind a trusted LAN or VPN. See [Security and remote actions](docs/SETUP.md#security-and-remote-actions) and the [security policy](SECURITY.md).
 
 ## Operations notes
 
@@ -198,16 +139,15 @@ To use a pinned release instead of a local build, set `WATCHDOG_IMAGE=ghcr.io/gr
 
 ## Documentation
 
-- **[ZettOS setup, Android installation, updates, and troubleshooting](docs/SETUP.md)**
-- **[Other Linux operating systems](docs/OTHER_LINUX.md)**
-- **[Compatibility and hardware discovery](docs/COMPATIBILITY.md)**
-- **[Configuration reference](docs/CONFIGURATION.md)**
-- **[Google Play publication](docs/PLAY_STORE.md)** · store text, signing, closed-test signup/tester onboarding, privacy, review/demo, and asset package
-- **[Privacy policy](PRIVACY.md)** · actual local/server data flows, removal, and security
-- **[Third-party names and independence](TRADEMARKS.md)** · unofficial status and original-brand safeguards
-- **[HTTP API](docs/API.md)**
-- **[Publishing signed APKs and GHCR containers](docs/RELEASING.md)**
-- **[Contributing](CONTRIBUTING.md)**
+- [Setup](docs/SETUP.md): ZettOS installation, Android, updates, troubleshooting
+- [Configuration](docs/CONFIGURATION.md): environment variables and thresholds
+- [Compatibility](docs/COMPATIBILITY.md): discovery behavior and the D8U checklist
+- [Other Linux systems](docs/OTHER_LINUX.md)
+- [HTTP API](docs/API.md)
+- [Google Play guide](docs/PLAY_STORE.md)
+- [Releasing](docs/RELEASING.md) and [testing notes](docs/TESTING.md)
+- [Privacy](PRIVACY.md), [security](SECURITY.md), and [third-party notices](TRADEMARKS.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## Development and verification
 
@@ -230,23 +170,13 @@ npm ci
 npm run build
 ```
 
-GitHub Actions runs Go tests/race tests/vet, the Android tests/lint/APK build, Compose validation, and an AMD64 Docker image build. See [Continuous integration](.github/workflows/ci.yml).
+GitHub Actions runs the Go tests, race detector and vet, Android tests/lint/APK build, Compose validation, and an x86-64 Docker image build. See [Continuous integration](.github/workflows/ci.yml).
 
-Release preparation covered a live D6U watchdog/API and the Android JVM/lint/debug-build checks. Physical-device Android UI validation is still welcome; compiled Compose previews alone are not a substitute for testing a phone.
-
-## Project layout
-
-```text
-watchdog/          Go collector, API, embedded dashboard, Dockerfile, Compose
-android/           Kotlin / Jetpack Compose Android client
-scripts/           Read-only hardware report for compatibility issues
-docs/              Setup, compatibility, configuration, and API guides
-.github/           CI and issue/PR templates
-```
+The watchdog has been tested against a live D6U. Android UI testing has run on emulators; physical-device reports are welcome. See [Testing](docs/TESTING.md) for current evidence.
 
 ## Contributing
 
-D8U validation, missing-sensor reports, Android UI testing, and documentation fixes are especially useful. ARM support needs an owner with D4/D6 hardware; it should be developed and tested rather than promised from the AMD64 implementation alone.
+D8U validation, missing-sensor reports, Android device testing, and documentation fixes are especially useful. ARM support needs someone with D4/D6 hardware; a different build target alone is not support.
 
 Use a small, redacted **[hardware report](docs/COMPATIBILITY.md#reporting-a-hardware-difference)** when opening a compatibility issue. Never upload `.env`, API tokens, ntfy topics/tokens, serial numbers, private IP addresses, raw logs, or a complete `/stats` response.
 
