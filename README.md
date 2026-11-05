@@ -2,7 +2,7 @@
 
 **Independent NAS monitoring with a live web dashboard, Android companion, and alerts that explain what actually happened.**
 
-Community-developed for compatible AMD64 NAS systems, with the primary experience tuned for Zettlab D6 Ultra/D8 Ultra running ZettOS. It catches what ordinary uptime checks miss: a btrfs pool forced read-only, a marginal DIMM, a hot NVMe controller, a stopped fan, unhealthy drives, or a container that is present but no longer running.
+Community-developed for compatible Intel/AMD x86-64 NAS systems, with the primary experience tuned for Zettlab D6 Ultra/D8 Ultra running ZettOS. It catches what ordinary uptime checks miss: a btrfs pool forced read-only, a marginal DIMM, a hot NVMe controller, a stopped fan, unhealthy drives, or a container that is present but no longer running.
 
 > **Unofficial and independent.** NAS Watchdog is not affiliated with, sponsored by, authorized by, or endorsed by Zettlab or any other NAS manufacturer. Third-party names appear only as factual compatibility references. See [Third-party names and independence](TRADEMARKS.md).
 
@@ -12,7 +12,7 @@ Community-developed for compatible AMD64 NAS systems, with the primary experienc
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84)](#android-app)
 [![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-> **Built for ZettLabs. Tuned for ZettOS.** D6 Ultra (D6U) has been live-tested on ZettOS; D8 Ultra (D8U) needs owner validation. **D4 and D6 ARM models are not supported yet.** Running another OS on your D6U/D8U? The Docker service can also be adapted to other **AMD64 Linux** installations; see the [non-ZettOS guide](docs/OTHER_LINUX.md). Hardware reports and well-tested contributions are welcome.
+> **Built for Zettlab Ultra. Tuned for ZettOS.** D6 Ultra (D6U) has been live-tested on ZettOS; D8 Ultra (D8U) needs owner validation. **D4 and D6 ARM models are not supported yet.** Running another OS on your D6U/D8U? The Docker service can also be adapted to other **x86-64 Linux** installations (`amd64` in Docker/Go); see the [non-ZettOS guide](docs/OTHER_LINUX.md). Hardware reports and well-tested contributions are welcome.
 
 **[Install on ZettOS](docs/SETUP.md) · [Download APK / Play AAB](https://github.com/greyyk/nas-watchdog/releases/latest) · [Google Play guide](docs/PLAY_STORE.md) · [Container image](#published-containers) · [Privacy](PRIVACY.md)**
 
@@ -36,8 +36,8 @@ No external metrics server, account, Firebase project, or chart service is requi
 
 | Model | Architecture | Status |
 |---|---|---|
-| **D6 Ultra (D6U)** | Intel Core Ultra 5 125H / Linux AMD64 (`x86_64`) | **Tested** against a live ZettOS system |
-| **D8 Ultra (D8U)** | Intel Core Ultra 5 125H / Linux AMD64 target | **Expected compatible; hardware validation wanted** |
+| **D6 Ultra (D6U)** | Intel Core Ultra 5 125H / x86-64 (`linux/amd64`) | **Tested** against a live ZettOS system |
+| **D8 Ultra (D8U)** | Intel Core Ultra 5 125H / x86-64 target (`linux/amd64`) | **Expected compatible; hardware validation wanted** |
 | **D6 / D4** | RK3588 ARM | **Not supported in this release**; see the [contribution path](docs/COMPATIBILITY.md#arm-contributions) |
 
 Sensor availability is firmware and kernel dependent. The watchdog reports what the host actually exposes; it never fabricates missing GPU, UPS, PSU, IPMI, fan, or drive readings. See **[Compatibility and hardware discovery](docs/COMPATIBILITY.md)** for exact behavior and a D8U validation checklist.
@@ -171,7 +171,7 @@ Use a long random token, keep `.env` private, patch and review updates, and keep
 
 ### Published containers
 
-The release workflow publishes Linux AMD64 images to **GitHub Container Registry**:
+The release workflow publishes Linux x86-64 (`linux/amd64`) images to **GitHub Container Registry**:
 
 ```text
 ghcr.io/greyyk/nas-watchdog:<version>

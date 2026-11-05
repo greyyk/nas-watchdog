@@ -8,7 +8,15 @@
 | **D8 Ultra (D8U)** | Intel Core Ultra 5 125H, `linux/amd64` | Same CPU/target with eight SATA bays and two M.2 slots; not yet validated on physical D8U hardware | Confirm sensors, all populated slots, SMART, fans, pool path, and Docker inventory |
 | **D6 / D4** | RK3588 ARM | Explicitly not supported initially | An owner/contributor with hardware, ARM64 build/test work, and validation |
 
-The model/CPU/bay details above follow Zettlab’s **[official model comparison](https://zettlab.com/pages/d4-d6)**. Physical bay count is not the same as populated-drive count; the collector reports the devices that are actually present.
+The model/CPU/bay details above follow Zettlab’s **[official model comparison](https://zettlab.com/pages/d4-d6)** and **[D6 Ultra/D8 Ultra specifications](https://zettlab.com/products/zettlab-d6-d8-ultra)**: both Ultra models use Intel Core Ultra 5 125H processors, with six/eight SATA bays and two M.2 slots respectively. Physical bay count is not the same as populated-drive count; the collector reports the devices that are actually present.
+
+### Architecture terminology
+
+**AMD64 does not mean an AMD-manufactured processor.** [Go defines `amd64` as 64-bit x86](https://go.dev/doc/install/source#environment), and [Docker selects `linux/amd64` on x86-64 systems](https://docs.docker.com/build/building/multi-platform/). Linux normally reports that architecture as `x86_64`. The Intel Core Ultra 5 125H explicitly supports [Intel 64 and a 64-bit instruction set](https://www.intel.com/content/www/us/en/products/sku/236848/intel-core-ultra-5-processor-125h-18m-cache-up-to-4-50-ghz/specifications.html), so the Ultra models use the native `linux/amd64` watchdog image.
+
+D4/D6 use the ARM-based RK3588. NAS Watchdog publishes no ARM image and does not support those models in this release; changing a CPU-family label alone would not establish hardware compatibility.
+
+Official specifications establish hardware identity, not sensor availability, NAS Watchdog support, or performance on a particular installation. The D6U validation and D8U owner-validation distinction remains unchanged.
 
 ### Operating-system support
 
