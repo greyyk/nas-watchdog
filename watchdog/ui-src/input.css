@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: dim --default, night, light;
+}
+@source "../ui/index.html";
+@source "../ui/app.js";
+
+html, body { min-height: 100%; }
+
+.num { font-variant-numeric: tabular-nums; }
+
+.logview {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  height: 62vh;
+  overflow: auto;
+}
+
+.uplot { font-family: inherit; }
+.u-legend { color: #cbd5e1; font-size: 11px; }
+.u-legend .u-marker { border-radius: 2px; }
+
+.scroll-x { overflow-x: auto; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(148,163,184,.25); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }

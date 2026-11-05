@@ -1,0 +1,66 @@
+name: Hardware compatibility
+description: Report a missing/incorrect sensor, validate D8U, or investigate D4/D6 ARM support
+title: "[Hardware]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping cover more than one NAS layout. Please use `sh scripts/hardware-report.sh > hardware-report.txt` on the NAS, then **review and redact the result**. Never attach `.env`, tokens, notification topics/URLs, raw `/stats`, SMART serials, host logs, MAC/IP addresses, or process arguments.
+  - type: dropdown
+    id: model
+    attributes:
+      label: ZettLabs model
+      options:
+        - D6U
+        - D8U
+        - D6 (ARM)
+        - D4 (ARM)
+        - Other ZettLabs model
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Operating system / kernel / architecture
+      description: Include ZettOS (or other distro) version, `uname -r`, and `uname -m`.
+      placeholder: "ZettOS x.y (or distro/release) · kernel 6.x · x86_64"
+    validations:
+      required: true
+  - type: input
+    id: watchdog-version
+    attributes:
+      label: Watchdog version or source commit
+      placeholder: "Dashboard/app version or commit SHA"
+    validations:
+      required: true
+  - type: textarea
+    id: inventory
+    attributes:
+      label: Populated hardware and expected result
+      description: How many SATA/NVMe slots are occupied? Which DIMM/fan/other sensors exist? What is missing or wrong?
+      placeholder: "Six SATA drives, one NVMe; nvme1 is present but Sensor 2 is absent from Thermal. No fan2 is installed."
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Reviewed hardware report
+      description: Paste only the reviewed output of scripts/hardware-report.sh. Remove any sensitive paths or labels you do not want public.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Additional redacted evidence
+      description: Optional watchdog errors or small screenshots. Do not paste full logs or stats JSON.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety and privacy checks
+      options:
+        - label: I reviewed every pasted/attached line and removed secrets, serials, addresses, and personal data.
+          required: true
+        - label: I did not induce overheating, disconnect cooling/drives under load, damage a filesystem, or enable untested auto-reboot to gather this report.
+          required: true

@@ -1,0 +1,64 @@
+name: Bug report
+description: Report a watchdog, dashboard, Android, build, or setup problem
+title: "[Bug]: "
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Collector / API
+        - Docker / Compose / setup
+        - Web dashboard
+        - Android app
+        - Alerts / notifications
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: NAS model and architecture
+      placeholder: "D6U · x86_64"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Watchdog/app version or source commit
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe expected versus actual behavior, including when it started.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Safe reproduction steps
+      description: Do not damage storage, disconnect drives/fans, overheat hardware, or enable untested automatic reboot to reproduce a bug.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Small redacted logs or test output
+      description: Remove tokens, topic/webhook/heartbeat URLs, serials, MAC/IP addresses, process arguments, and personal data. Do not attach full /stats output or .env.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and used the current setup/troubleshooting guide.
+          required: true
+        - label: I reviewed and redacted all supplied content.
+          required: true

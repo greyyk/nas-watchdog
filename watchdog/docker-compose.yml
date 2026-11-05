@@ -1,0 +1,46 @@
+services:
+  watchdog:
+    build:
+      context: .
+    image: nas-watchdog:1.0.0
+    # The supported D6U/D8U release target is Linux/AMD64. D4/D6 ARM builds
+    # are not currently supported; see docs/COMPATIBILITY.md.
+    platform: linux/amd64
+    container_name: nas-watchdog
+    restart: unless-stopped
+
+    # SMART uses raw devices below /host/dev. Host PID/network namespaces are
+    # also needed for accurate host telemetry and the optional guarded reboot.
+    # Understand this trust boundary before installing; see docs/SETUP.md.
+    privileged: true
+    pid: host
+
+    ports:
+      - "${WATCHDOG_BIND_ADDRESS:-0.0.0.0}:${WATCHDOG_PORT:-8090}:8080"
+
+    environment:
+      # Compose fails with a useful message instead of starting an open API.
+      WD_API_TOKEN: "${WD_API_TOKEN:?Set WD_API_TOKEN in watchdog/.env before starting}"
+      WD_POOL_HOST_PATH: "${POOL_HOST_PATH:-/zettos/pool/1}"
+    env_file:
+      - .env
+
+    volumes:
+      # Read-only host view for /proc, /sys, /dev, /var/log, and ZettOS logs.
+      - /:/host:ro
+      # Set POOL_HOST_PATH in .env if your ZettOS pool uses another mountpoint.
+      - ${POOL_HOST_PATH:-/zettos/pool/1}:/pool:ro
+      # The Docker API socket is privileged even when mounted read-write. The
+      # service exposes mutating Docker actions only when explicitly enabled.
+      - /var/run/docker.sock:/var/run/docker.sock
+      - watchdog-data:/data
+
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  watchdog-data:

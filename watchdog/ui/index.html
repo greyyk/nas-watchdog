@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en" data-theme="dim">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NAS Watchdog</title>
+<link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/vendor/uPlot.min.css">
+</head>
+<body class="bg-base-300 text-base-content antialiased">
+
+<aside class="hidden md:flex fixed inset-y-0 left-0 w-60 flex-col bg-base-100 border-r border-base-content/10 z-30">
+  <div class="px-5 py-5 border-b border-base-content/10">
+    <div class="text-[13px] font-bold tracking-[0.22em]">NAS WATCHDOG</div>
+    <div id="side-host" class="text-xs opacity-50 truncate mt-1">connecting…</div>
+  </div>
+  <nav id="side-nav" class="menu p-3 gap-0.5 flex-1 overflow-y-auto"></nav>
+  <div class="px-4 py-4 border-t border-base-content/10 text-xs">
+    <div class="flex items-center gap-2">
+      <span id="side-dot" class="status status-error"></span>
+      <span id="side-status" class="opacity-60">stale</span>
+    </div>
+    <div id="side-version" class="opacity-30 mt-1"></div>
+  </div>
+</aside>
+
+<div class="md:pl-60 min-h-screen flex flex-col">
+  <header class="sticky top-0 z-20 flex items-center gap-3 px-4 md:px-6 h-14 bg-base-100/95 backdrop-blur border-b border-base-content/10">
+    <div class="md:hidden font-bold tracking-[0.18em] text-xs">NAS&nbsp;WATCHDOG</div>
+    <div id="top-host" class="hidden sm:block text-xs opacity-50 truncate"></div>
+    <div class="flex-1"></div>
+    <span id="top-dot" class="status status-error"></span>
+    <span id="top-status" class="hidden sm:inline text-xs opacity-50">stale</span>
+    <button class="btn btn-ghost btn-xs" id="btn-refresh" title="Refresh">refresh</button>
+    <button class="btn btn-ghost btn-xs" id="btn-theme" title="Theme">theme</button>
+  </header>
+
+  <main id="view" class="flex-1 w-full max-w-[1600px] mx-auto p-4 md:p-6 pb-28 md:pb-10"></main>
+</div>
+
+<nav class="md:hidden fixed bottom-0 inset-x-0 z-30" id="bottom-nav"></nav>
+
+<dialog id="modal-token" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">API token required</h3>
+    <p class="text-sm opacity-60 mt-1">This watchdog is protected. Paste the token from WD_API_TOKEN.</p>
+    <input id="token-input" class="input input-bordered w-full mt-4" type="password" placeholder="token">
+    <div class="modal-action">
+      <button class="btn btn-primary btn-sm" id="token-save">save</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="modal-confirm" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg" id="confirm-title">Confirm</h3>
+    <p class="text-sm opacity-60 mt-1" id="confirm-detail"></p>
+    <div class="modal-action">
+      <button class="btn btn-ghost btn-sm" id="confirm-cancel">cancel</button>
+      <button class="btn btn-error btn-sm" id="confirm-ok">confirm</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="modal-more" class="modal">
+  <div class="modal-box max-w-xs p-3">
+    <h3 class="font-bold text-sm px-2 py-1">More</h3>
+    <div id="more-list" class="menu mt-1"></div>
+  </div>
+</dialog>
+
+<dialog id="modal-logs" class="modal">  <div class="modal-box max-w-5xl">
+    <div class="flex items-center gap-3">
+      <h3 class="font-bold text-lg" id="logs-title">logs</h3>
+      <button class="btn btn-xs btn-ghost ml-auto" id="logs-refresh">refresh</button>
+      <button class="btn btn-xs btn-ghost" id="logs-close">close</button>
+    </div>
+    <pre id="logs-body" class="logview bg-base-200/60 rounded-box p-3 mt-3"></pre>
+  </div>
+</dialog>
+
+<div id="toasts" class="toast toast-end toast-bottom z-50"></div>
+
+<script src="/vendor/uPlot.iife.min.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
