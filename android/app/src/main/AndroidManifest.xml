@@ -33,7 +33,7 @@
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Continuous monitoring of a user-configured local NAS health stream" />
+                android:value="User-enabled continuous NAS health monitoring with visible status, immediate alert relevance, and in-app stop controls" />
         </service>
 
         <receiver

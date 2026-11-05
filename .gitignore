@@ -4,6 +4,8 @@
 !**/.env.example
 **/local.properties
 *.pem
+# Public Play upload certificate only; all private key formats remain ignored.
+!play/upload-certificate.pem
 *.key
 *.jks
 *.keystore
@@ -18,6 +20,8 @@ coverage.out
 
 # Web dependencies/build tools
 **/node_modules/
+.test-runtime/
+*.idsig
 **/npm-debug.log*
 
 # Android / Gradle / IDE

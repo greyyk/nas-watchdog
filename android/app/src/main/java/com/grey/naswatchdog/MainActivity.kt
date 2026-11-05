@@ -1,12 +1,13 @@
 package com.grey.naswatchdog
 
-import android.Manifest
 import android.content.Context
-import android.os.Build
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -79,6 +80,17 @@ fun bytes(v: Long): String {
     return String.format(Locale.US, if (i == 0) "%.0f %s" else "%.1f %s", d, units[i])
 }
 
+internal const val PRIVACY_POLICY_URL = "https://github.com/greyyk/nas-watchdog/blob/main/PRIVACY.md"
+internal const val PROJECT_URL = "https://github.com/greyyk/nas-watchdog"
+
+fun openExternalLink(context: Context, url: String) {
+    try {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    } catch (e: android.content.ActivityNotFoundException) {
+        android.widget.Toast.makeText(context, "No browser is available to open this link.", android.widget.Toast.LENGTH_LONG).show()
+    }
+}
+
 fun rate(v: Double): String = bytes(v.toLong()) + "/s"
 fun pct(v: Double, d: Int = 1): String = String.format(Locale.US, "%.${d}f%%", v)
 fun num(v: Double, d: Int = 1): String = String.format(Locale.US, "%.${d}f", v)
@@ -100,7 +112,10 @@ fun duration(sec: Double): String {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+        )
         ensureAlertChannel(this)
         scheduleAlertWorker(this)
         setContent {
@@ -114,19 +129,33 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun App() {
     val ctx = LocalContext.current
-    val prefs = remember { ctx.getSharedPreferences("naswatchdog", Context.MODE_PRIVATE) }
+    val telemetryViewModel: TelemetryViewModel = viewModel()
+    val prefs = remember {
+        ctx.getSharedPreferences("naswatchdog", Context.MODE_PRIVATE).also { preferences ->
+            if (!preferences.contains("background_defaults_migrated")) {
+                // Preserve the old enabled default only for an already configured
+                // installation. New users explicitly opt into background alerts.
+                val existingInstall = preferences.contains("baseUrl")
+                preferences.edit()
+                    .putBoolean("notifications", preferences.getBoolean("notifications", existingInstall))
+                    .putBoolean("live_monitoring", preferences.getBoolean("live_monitoring", existingInstall))
+                    .putBoolean("background_defaults_migrated", true)
+                    .apply()
+            }
+        }
+    }
     var baseUrl by remember { mutableStateOf(prefs.getString("baseUrl", "") ?: "") }
     var token by remember { mutableStateOf(prefs.getString("token", "") ?: "") }
     var editing by remember { mutableStateOf(baseUrl.isBlank()) }
+    val scope = rememberCoroutineScope()
 
-    val permLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-        syncAlertMonitoring(ctx)
+    fun saveConnection(url: String, newToken: String) {
+        baseUrl = url
+        token = newToken
+        prefs.edit().putString("baseUrl", url).putString("token", newToken).apply()
+        editing = false
     }
-    LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= 33 && !canNotify(ctx)) {
-            permLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
+
     LaunchedEffect(editing, baseUrl, token) {
         if (!editing) syncAlertMonitoring(ctx)
     }
@@ -135,24 +164,31 @@ fun App() {
         SetupScreen(
             initialUrl = baseUrl,
             initialToken = token,
-            onSave = { url, newToken ->
-                baseUrl = url
-                token = newToken
-                prefs.edit().putString("baseUrl", url).putString("token", newToken).apply()
-                editing = false
-            },
+            onSave = ::saveConnection,
             onCancel = if (baseUrl.isNotBlank()) ({ editing = false }) else null,
+            onDemo = { saveConnection(DEMO_SERVER_URL, "synthetic-demo") },
         )
     } else {
         Dashboard(
             baseUrl = baseUrl,
             token = token,
             prefs = prefs,
+            telemetryViewModel = telemetryViewModel,
             onSettings = { editing = true },
             onConnectionChange = { url, newToken ->
                 baseUrl = url
                 token = newToken
                 prefs.edit().putString("baseUrl", url).putString("token", newToken).apply()
+            },
+            onForgetConnection = {
+                scope.launch {
+                    prefs.edit().clear().putBoolean("background_defaults_migrated", true).apply()
+                    syncAlertMonitoring(ctx)
+                    telemetryViewModel.disconnectAndClearLocalData()
+                    baseUrl = ""
+                    token = ""
+                    editing = true
+                }
             },
         )
     }
@@ -164,7 +200,9 @@ fun SetupScreen(
     initialToken: String,
     onSave: (String, String) -> Unit,
     onCancel: (() -> Unit)? = null,
+    onDemo: () -> Unit,
 ) {
+    val ctx = LocalContext.current
     var url by remember { mutableStateOf(initialUrl) }
     var token by remember { mutableStateOf(initialToken) }
     var connecting by remember { mutableStateOf(false) }
@@ -229,6 +267,11 @@ fun SetupScreen(
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.fillMaxWidth(),
             )
+            Text(
+                "Direct HTTP is unencrypted. Use it only on a trusted private LAN/VPN; prefer a valid HTTPS proxy for remote access. Never expose the watchdog port publicly.",
+                fontSize = 12.sp, lineHeight = 18.sp, color = Amber,
+                modifier = Modifier.padding(top = 8.dp),
+            )
             Spacer(Modifier.height(14.dp))
             OutlinedTextField(
                 value = token,
@@ -265,6 +308,27 @@ fun SetupScreen(
                     Text("Connect", fontWeight = FontWeight.SemiBold)
                 }
             }
+            Spacer(Modifier.height(16.dp))
+            OutlinedButton(
+                onClick = onDemo,
+                enabled = !connecting,
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+            ) { Text("Explore synthetic demo") }
+            Text(
+                "Preview the app with generated example telemetry. No NAS or internet connection is used, and actions are disabled.",
+                fontSize = 12.sp, lineHeight = 18.sp, color = Dim,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            )
+            TextButton(
+                onClick = { openExternalLink(ctx, PRIVACY_POLICY_URL) },
+                modifier = Modifier.heightIn(min = 48.dp).align(Alignment.CenterHorizontally),
+            ) { Text("Privacy policy") }
+            TextButton(
+                onClick = { openExternalLink(ctx, PROJECT_URL) },
+                modifier = Modifier.heightIn(min = 48.dp).align(Alignment.CenterHorizontally),
+            ) { Text("Independent project · not affiliated with a NAS manufacturer") }
             if (onCancel != null) {
                 TextButton(onClick = onCancel, enabled = !connecting, modifier = Modifier.fillMaxWidth()) {
                     Text("Cancel")
@@ -299,8 +363,9 @@ fun Dashboard(
     prefs: android.content.SharedPreferences,
     onSettings: () -> Unit,
     onConnectionChange: (String, String) -> Unit,
+    onForgetConnection: () -> Unit,
+    telemetryViewModel: TelemetryViewModel = viewModel(),
 ) {
-    val telemetryViewModel: TelemetryViewModel = viewModel()
     val telemetry by telemetryViewModel.state.collectAsStateWithLifecycle()
     var refreshMs by remember { mutableLongStateOf(prefs.getLong("refresh_ms", 10_000L)) }
     var historyRangeName by rememberSaveable { mutableStateOf(HistoryRange.ONE_HOUR.name) }
@@ -315,7 +380,7 @@ fun Dashboard(
             telemetry.feedStatus != FeedStatus.LIVE || telemetry.snapshot?.cached == true -> {
                 scope.launch { snack.showSnackbar("Controls unavailable while telemetry is not live. Reconnect first.") }
             }
-            capabilities?.actionsEnabled != true || (action == "reboot" && !capabilities.rebootEnabled) -> {
+            capabilities?.actionsEnabled != true -> {
                 scope.launch { snack.showSnackbar("This action is disabled by the watchdog.") }
             }
             runningAction != null -> {
@@ -411,7 +476,20 @@ fun Dashboard(
             TopAppBar(
                 title = {
                     Column {
-                        Text(titles[currentRoute] ?: "NAS Watchdog", fontSize = 19.sp, fontWeight = FontWeight.SemiBold)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                titles[currentRoute] ?: "NAS Watchdog",
+                                fontSize = 19.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f),
+                            )
+                            if (isDemoConnection(baseUrl)) {
+                                Spacer(Modifier.width(8.dp))
+                                Text("DEMO", fontSize = 10.sp, color = Amber, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                            }
+                        }
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 Modifier.size(6.dp).background(
@@ -588,6 +666,7 @@ fun Dashboard(
                             scope.launch { snack.showSnackbar("Settings saved") }
                         },
                         onEditConnection = onSettings,
+                        onForgetConnection = onForgetConnection,
                     )
                 }
                 composable(AppRoute.MORE) {

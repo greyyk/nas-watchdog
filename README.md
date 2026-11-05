@@ -1,10 +1,12 @@
-# ZettLabs NAS Watchdog
+# NAS Watchdog
 
-**ZettOS-first monitoring with a live web dashboard, rich Android app, and alerts that explain what actually happened.**
+**Independent NAS monitoring with a live web dashboard, Android companion, and alerts that explain what actually happened.**
 
-Purpose-built for ZettLabs D6 Ultra and D8 Ultra hardware. It catches what ordinary uptime checks miss: a btrfs pool forced read-only, a marginal DIMM, a hot NVMe controller, a stopped fan, unhealthy drives, or a container that is present but no longer running.
+Community-developed for compatible AMD64 NAS systems, with the primary experience tuned for Zettlab D6 Ultra/D8 Ultra running ZettOS. It catches what ordinary uptime checks miss: a btrfs pool forced read-only, a marginal DIMM, a hot NVMe controller, a stopped fan, unhealthy drives, or a container that is present but no longer running.
 
-[![ZettLabs D6U tested](https://img.shields.io/badge/ZettLabs-D6U%20tested-35c58b)](#model-support)
+> **Unofficial and independent.** NAS Watchdog is not affiliated with, sponsored by, authorized by, or endorsed by Zettlab or any other NAS manufacturer. Third-party names appear only as factual compatibility references. See [Third-party names and independence](TRADEMARKS.md).
+
+[![D6U tested](https://img.shields.io/badge/D6U-tested-35c58b)](#model-support)
 [![D8U validation wanted](https://img.shields.io/badge/D8U-validation%20wanted-e9b949)](#model-support)
 [![Docker · Linux AMD64](https://img.shields.io/badge/Docker-Linux%2FAMD64-2496ED)](#quick-start)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84)](#android-app)
@@ -12,7 +14,9 @@ Purpose-built for ZettLabs D6 Ultra and D8 Ultra hardware. It catches what ordin
 
 > **Built for ZettLabs. Tuned for ZettOS.** D6 Ultra (D6U) has been live-tested on ZettOS; D8 Ultra (D8U) needs owner validation. **D4 and D6 ARM models are not supported yet.** Running another OS on your D6U/D8U? The Docker service can also be adapted to other **AMD64 Linux** installations; see the [non-ZettOS guide](docs/OTHER_LINUX.md). Hardware reports and well-tested contributions are welcome.
 
-**[ZettOS installation](docs/SETUP.md) · [Hardware discovery](#hardware-that-adapts-to-the-nas) · [Android app](#android-app) · [Configuration](docs/CONFIGURATION.md) · [Official Zettlab Wiki](https://wiki.zettlab.com/?locale=en-US)**
+**[Install on ZettOS](docs/SETUP.md) · [Download APK / Play AAB](https://github.com/greyyk/nas-watchdog/releases/latest) · [Google Play guide](docs/PLAY_STORE.md) · [Container image](#published-containers) · [Privacy](PRIVACY.md)**
+
+The embedded dashboard and Android app now share a responsive instrument-style interface: clear health hierarchy, history ranges, component thermals, connectivity feedback, and guarded controls. The in-app synthetic demo provides safe screenshots and Play review access without a real NAS credential.
 
 ## Highlights
 
@@ -118,7 +122,7 @@ Missing capabilities remain visible as **not reported**, not as zero-valued hard
 
 The Android client includes live telemetry, last-good offline snapshots, CPU and thermal instruments, storage/SMART details, Docker controls and logs, network information, alert history, and guarded actions.
 
-Tagged releases can publish a **signed release APK with SHA-256 checksums** through the automated [Release workflow](.github/workflows/release.yml). Maintainers configure one persistent signing identity as described in the [release guide](docs/RELEASING.md).
+Each tagged release publishes a **signed release APK plus a Play-compatible signed AAB and SHA-256 checksums** through the [Release workflow](.github/workflows/release.yml). The direct APK preserves its existing signing identity; Play uses a separate upload key and Play App Signing. See [release installation](docs/RELEASING.md) and the [Google Play publication guide](docs/PLAY_STORE.md).
 
 ### Build
 
@@ -170,11 +174,11 @@ Use a long random token, keep `.env` private, patch and review updates, and keep
 The release workflow publishes Linux AMD64 images to **GitHub Container Registry**:
 
 ```text
-ghcr.io/<owner>/<repository>:<version>
-ghcr.io/<owner>/<repository>:latest
+ghcr.io/greyyk/nas-watchdog:<version>
+ghcr.io/greyyk/nas-watchdog:latest
 ```
 
-To use a pinned release instead of a local build, set `WATCHDOG_IMAGE=ghcr.io/<owner>/<repository>:<version>` in `watchdog/.env`, then run `sudo docker compose pull` and `sudo docker compose up -d --no-build`. See [Release installation](docs/RELEASING.md#5-use-the-ghcr-image-on-zettos) for verification, upgrades, and package visibility.
+To use a pinned release instead of a local build, set `WATCHDOG_IMAGE=ghcr.io/greyyk/nas-watchdog:1.5.0` in `watchdog/.env`, then run `sudo docker compose pull` and `sudo docker compose up -d --no-build`. See [Release installation](docs/RELEASING.md#5-use-the-ghcr-image-on-zettos) for verification, upgrades, and package visibility.
 
 ## Documentation
 
@@ -182,6 +186,9 @@ To use a pinned release instead of a local build, set `WATCHDOG_IMAGE=ghcr.io/<o
 - **[Other Linux operating systems](docs/OTHER_LINUX.md)**
 - **[Compatibility and hardware discovery](docs/COMPATIBILITY.md)**
 - **[Configuration reference](docs/CONFIGURATION.md)**
+- **[Google Play publication](docs/PLAY_STORE.md)** · store text, signing, privacy, review/demo, and asset package
+- **[Privacy policy](PRIVACY.md)** · actual local/server data flows, removal, and security
+- **[Third-party names and independence](TRADEMARKS.md)** · unofficial status and original-brand safeguards
 - **[HTTP API](docs/API.md)**
 - **[Publishing signed APKs and GHCR containers](docs/RELEASING.md)**
 - **[Contributing](CONTRIBUTING.md)**

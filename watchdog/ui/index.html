@@ -1,87 +1,136 @@
 <!doctype html>
-<html lang="en" data-theme="dim">
+<html lang="en" data-theme="dark">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NAS Watchdog</title>
-<link rel="stylesheet" href="/app.css">
-<link rel="stylesheet" href="/vendor/uPlot.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="NAS Watchdog local server telemetry and health console">
+  <title>NAS Watchdog</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23080D10' d='M0 0h64v64H0z'/%3E%3Cpath fill='none' stroke='%238CE6C1' stroke-width='5' stroke-linejoin='round' d='M32 8 52 16v15c0 13-8 21-20 26C20 52 12 44 12 31V16Z'/%3E%3Cpath fill='none' stroke='%238CE6C1' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' d='m19 34 7-8 7 13 6-9 6 4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/vendor/uPlot.min.css">
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem('wd_theme') || 'dark';
+        if (!['dark', 'light', 'system'].includes(theme)) theme = 'dark';
+        document.documentElement.dataset.theme = theme;
+      } catch (_) { document.documentElement.dataset.theme = 'dark'; }
+    }());
+  </script>
 </head>
-<body class="bg-base-300 text-base-content antialiased">
+<body>
+  <a class="skip-link" href="#main-content">Skip to telemetry</a>
 
-<aside class="hidden md:flex fixed inset-y-0 left-0 w-60 flex-col bg-base-100 border-r border-base-content/10 z-30">
-  <div class="px-5 py-5 border-b border-base-content/10">
-    <div class="text-[13px] font-bold tracking-[0.22em]">NAS WATCHDOG</div>
-    <div id="side-host" class="text-xs opacity-50 truncate mt-1">connecting…</div>
-  </div>
-  <nav id="side-nav" class="menu p-3 gap-0.5 flex-1 overflow-y-auto"></nav>
-  <div class="px-4 py-4 border-t border-base-content/10 text-xs">
-    <div class="flex items-center gap-2">
-      <span id="side-dot" class="status status-error"></span>
-      <span id="side-status" class="opacity-60">stale</span>
+  <aside class="sidebar" aria-label="Primary sidebar">
+    <a class="brand" href="#/overview" aria-label="NAS Watchdog overview">
+      <svg class="brand-mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <path d="M24 4 40 10v12c0 10.4-6.4 16.8-16 21.6C14.4 38.8 8 32.4 8 22V10Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="m13 25 5.5-6.5L24 30l5-7.5L35 26" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span><strong>NAS WATCHDOG</strong><small>LOCAL SERVER INSTRUMENT</small></span>
+    </a>
+    <nav id="side-nav" class="side-nav" aria-label="Watchdog sections"></nav>
+    <div class="sidebar-foot">
+      <div class="connection-row">
+        <span id="side-dot" class="status-dot" data-state="connecting" aria-hidden="true"></span>
+        <span id="side-status">Connecting</span>
+      </div>
+      <p id="side-host" class="machine truncate">Waiting for host</p>
+      <p id="side-version" class="quiet"></p>
     </div>
-    <div id="side-version" class="opacity-30 mt-1"></div>
+  </aside>
+
+  <div class="app-frame">
+    <header class="topbar">
+      <a class="mobile-brand" href="#/overview" aria-label="NAS Watchdog overview">
+        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 4 40 10v12c0 10.4-6.4 16.8-16 21.6C14.4 38.8 8 32.4 8 22V10Z" stroke="currentColor" stroke-width="3"/><path d="m13 25 5.5-6.5L24 30l5-7.5L35 26" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>NAS WATCHDOG</span>
+      </a>
+      <div class="topbar-status" role="status" aria-live="polite">
+        <span id="top-dot" class="status-dot" data-state="connecting" aria-hidden="true"></span>
+        <span id="top-status">Connecting</span>
+      </div>
+      <div class="topbar-actions">
+        <button id="btn-refresh" class="icon-button" type="button" aria-label="Refresh telemetry" title="Refresh telemetry">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-4M4 4v5h5M4 13a8 8 0 0 0 14.9 4M20 20v-5h-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="desktop-label">Refresh</span>
+        </button>
+        <a id="top-settings" class="icon-button" href="#/settings" aria-label="Open settings" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span class="desktop-label">Settings</span>
+        </a>
+      </div>
+    </header>
+
+    <main id="main-content" class="main-content">
+      <div id="route-back"></div>
+      <header class="page-heading">
+        <div class="min-w-0">
+          <p id="route-kicker" class="eyebrow">LIVE INSTRUMENT</p>
+          <h1 id="route-title" tabindex="-1">Overview</h1>
+          <p id="route-subtitle" class="page-subtitle">Connecting to the local watchdog…</p>
+        </div>
+        <div id="heading-state" class="heading-state"></div>
+      </header>
+      <div id="global-notice"></div>
+      <div id="view">
+        <div class="loading-state" role="status"><span class="loader" aria-hidden="true"></span><span>Waiting for the first telemetry sample…</span></div>
+      </div>
+    </main>
   </div>
-</aside>
 
-<div class="md:pl-60 min-h-screen flex flex-col">
-  <header class="sticky top-0 z-20 flex items-center gap-3 px-4 md:px-6 h-14 bg-base-100/95 backdrop-blur border-b border-base-content/10">
-    <div class="md:hidden font-bold tracking-[0.18em] text-xs">NAS&nbsp;WATCHDOG</div>
-    <div id="top-host" class="hidden sm:block text-xs opacity-50 truncate"></div>
-    <div class="flex-1"></div>
-    <span id="top-dot" class="status status-error"></span>
-    <span id="top-status" class="hidden sm:inline text-xs opacity-50">stale</span>
-    <button class="btn btn-ghost btn-xs" id="btn-refresh" title="Refresh">refresh</button>
-    <button class="btn btn-ghost btn-xs" id="btn-theme" title="Theme">theme</button>
-  </header>
+  <nav id="bottom-nav" class="bottom-nav" aria-label="Mobile sections"></nav>
 
-  <main id="view" class="flex-1 w-full max-w-[1600px] mx-auto p-4 md:p-6 pb-28 md:pb-10"></main>
-</div>
+  <dialog id="modal-token" class="dialog" aria-labelledby="token-title" aria-describedby="token-description">
+    <form id="token-form" class="dialog-panel">
+      <div class="dialog-icon" aria-hidden="true">KEY</div>
+      <h2 id="token-title">API token required</h2>
+      <p id="token-description">This watchdog is protected. Enter the token configured as <code>WD_API_TOKEN</code>. It is stored only in this browser.</p>
+      <label class="field" for="token-input"><span>API token</span><input id="token-input" name="token" type="password" autocomplete="current-password" spellcheck="false" required></label>
+      <p id="token-error" class="form-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="button secondary" id="token-dismiss" type="button">Not now</button>
+        <button class="button primary" id="token-save" type="submit">Save &amp; connect</button>
+      </div>
+    </form>
+  </dialog>
 
-<nav class="md:hidden fixed bottom-0 inset-x-0 z-30" id="bottom-nav"></nav>
-
-<dialog id="modal-token" class="modal">
-  <div class="modal-box">
-    <h3 class="font-bold text-lg">API token required</h3>
-    <p class="text-sm opacity-60 mt-1">This watchdog is protected. Paste the token from WD_API_TOKEN.</p>
-    <input id="token-input" class="input input-bordered w-full mt-4" type="password" placeholder="token">
-    <div class="modal-action">
-      <button class="btn btn-primary btn-sm" id="token-save">save</button>
+  <dialog id="modal-confirm" class="dialog" aria-labelledby="confirm-title" aria-describedby="confirm-detail confirm-note">
+    <div class="dialog-panel">
+      <p class="eyebrow danger">HOST ACTION</p>
+      <h2 id="confirm-title">Confirm request</h2>
+      <p id="confirm-detail"></p>
+      <div class="action-warning" id="confirm-note">This sends a request to the NAS. Acceptance does not mean the operation has completed.</div>
+      <div class="dialog-actions">
+        <button class="button secondary" id="confirm-cancel" type="button">Cancel</button>
+        <button class="button danger-button" id="confirm-ok" type="button">Issue request</button>
+      </div>
     </div>
-  </div>
-</dialog>
+  </dialog>
 
-<dialog id="modal-confirm" class="modal">
-  <div class="modal-box">
-    <h3 class="font-bold text-lg" id="confirm-title">Confirm</h3>
-    <p class="text-sm opacity-60 mt-1" id="confirm-detail"></p>
-    <div class="modal-action">
-      <button class="btn btn-ghost btn-sm" id="confirm-cancel">cancel</button>
-      <button class="btn btn-error btn-sm" id="confirm-ok">confirm</button>
+  <dialog id="modal-logs" class="dialog dialog-wide" aria-labelledby="logs-title" aria-describedby="logs-description">
+    <div class="dialog-panel log-dialog-panel">
+      <div class="dialog-heading-row">
+        <div class="min-w-0"><p class="eyebrow">CONTAINER OUTPUT</p><h2 id="logs-title">Container logs</h2></div>
+        <button class="icon-button close-button" id="logs-close" type="button" aria-label="Close container logs">×</button>
+      </div>
+      <p id="logs-description" class="quiet">Latest 400 lines. Output is shown as plain text.</p>
+      <div class="toolbar compact-toolbar">
+        <button class="button secondary small" id="logs-refresh" type="button">Refresh logs</button>
+        <button class="button secondary small" id="logs-copy" type="button">Copy output</button>
+        <span id="container-log-state" class="quiet" role="status"></span>
+      </div>
+      <p id="container-log-error" class="inline-error" role="alert"></p>
+      <pre id="logs-body" class="log-view" tabindex="0" aria-label="Container log output"></pre>
     </div>
-  </div>
-</dialog>
+  </dialog>
 
-<dialog id="modal-more" class="modal">
-  <div class="modal-box max-w-xs p-3">
-    <h3 class="font-bold text-sm px-2 py-1">More</h3>
-    <div id="more-list" class="menu mt-1"></div>
-  </div>
-</dialog>
+  <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
+  <noscript><div class="noscript">NAS Watchdog requires JavaScript to request and render local telemetry.</div></noscript>
 
-<dialog id="modal-logs" class="modal">  <div class="modal-box max-w-5xl">
-    <div class="flex items-center gap-3">
-      <h3 class="font-bold text-lg" id="logs-title">logs</h3>
-      <button class="btn btn-xs btn-ghost ml-auto" id="logs-refresh">refresh</button>
-      <button class="btn btn-xs btn-ghost" id="logs-close">close</button>
-    </div>
-    <pre id="logs-body" class="logview bg-base-200/60 rounded-box p-3 mt-3"></pre>
-  </div>
-</dialog>
-
-<div id="toasts" class="toast toast-end toast-bottom z-50"></div>
-
-<script src="/vendor/uPlot.iife.min.js"></script>
-<script src="/app.js"></script>
+  <script src="/vendor/uPlot.iife.min.js"></script>
+  <script src="/model.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>

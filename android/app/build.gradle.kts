@@ -8,19 +8,21 @@ plugins {
 
 android {
     namespace = "com.grey.naswatchdog"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.grey.naswatchdog"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         // Release CI supplies monotonically increasing code and tag-derived name.
-        versionCode = providers.gradleProperty("releaseVersionCode").orNull?.toIntOrNull() ?: 4
-        versionName = providers.gradleProperty("releaseVersionName").orNull ?: "1.3"
+        versionCode = providers.gradleProperty("releaseVersionCode").orNull?.toIntOrNull() ?: 5
+        versionName = providers.gradleProperty("releaseVersionName").orNull ?: "1.5.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // Local release builds remain unsigned unless the release CI environment is
-    // present. Keystore material is never passed as Gradle text or committed.
+    // Local release builds remain unsigned unless signing environment variables
+    // are present. Keystore files/passwords are never passed as Gradle text or committed.
+    // GitHub APK and Play upload identities are deliberately separate.
     val releaseStoreFile = System.getenv("ANDROID_KEYSTORE_FILE")
         ?.takeIf(String::isNotBlank)
         ?.let(::File)
@@ -40,12 +42,37 @@ android {
         }
     }
 
+    val playStoreFile = System.getenv("ANDROID_PLAY_KEYSTORE_FILE")
+        ?.takeIf(String::isNotBlank)
+        ?.let(::File)
+    if (playStoreFile != null) {
+        require(playStoreFile.isFile) { "Play upload keystore was not found at $playStoreFile" }
+        signingConfigs.create("play") {
+            storeFile = playStoreFile
+            storePassword = requireNotNull(System.getenv("ANDROID_PLAY_KEYSTORE_PASSWORD")) {
+                "Set ANDROID_PLAY_KEYSTORE_PASSWORD for Play upload signing"
+            }
+            keyAlias = requireNotNull(System.getenv("ANDROID_PLAY_KEY_ALIAS")) {
+                "Set ANDROID_PLAY_KEY_ALIAS for Play upload signing"
+            }
+            keyPassword = requireNotNull(System.getenv("ANDROID_PLAY_KEY_PASSWORD")) {
+                "Set ANDROID_PLAY_KEY_PASSWORD for Play upload signing"
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             if (releaseStoreFile != null) {
                 signingConfig = signingConfigs.getByName("release")
             }
+        }
+        create("play") {
+            initWith(getByName("release"))
+            // Never silently inherit the GitHub signing key into a Play upload.
+            // Without its own key this intentionally produces an unsigned bundle.
+            signingConfig = if (playStoreFile != null) signingConfigs.getByName("play") else null
         }
     }
 
@@ -78,6 +105,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.3")
     implementation("androidx.navigation:navigation-compose:2.8.3")
     debugImplementation("androidx.compose.ui:ui-tooling")
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test:runner:1.7.0")
+    androidTestImplementation("androidx.test:rules:1.7.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20240303")
 }

@@ -1008,7 +1008,7 @@ private fun ThermalEmptyState(text: String) {
     Text(text, style = MaterialTheme.typography.bodyMedium, color = Dim, modifier = Modifier.padding(vertical = 8.dp))
 }
 
-private fun thermalChartSeries(sensor: ThermalSensor, points: List<ChartPoint>, range: HistoryRange): ChartSeries {
+internal fun thermalChartSeries(sensor: ThermalSensor, points: List<ChartPoint>, range: HistoryRange): ChartSeries {
     val values = points.mapNotNull { it.value?.takeIf(Double::isFinite) }
     val thresholds = buildList {
         warningThreshold(sensor)?.let {
@@ -1023,7 +1023,9 @@ private fun thermalChartSeries(sensor: ThermalSensor, points: List<ChartPoint>, 
         hardwareCriticalThresholds(sensor).forEach { (label, value) ->
             add(ChartThreshold(value, "$label · ${num(value, 0)}°C", ThresholdKind.CRITICAL))
         }
-    }.distinctBy { it.value to it.kind }
+    }.sortedBy { it.kind != ThresholdKind.CRITICAL }
+        .distinctBy { it.value }
+        .sortedBy { it.value }
     val upper = (values + thresholds.map { it.value } + listOfNotNull(sensor.c)).maxOrNull() ?: 100.0
     val lower = minOf(values.minOrNull() ?: 0.0, 0.0)
     return ChartSeries(

@@ -190,7 +190,7 @@ fun connectionError(error: Throwable): String = when (error) {
     is UnknownHostException -> "Server not found. Check the address, Wi-Fi, and VPN."
     is ConnectException -> "Could not connect. Check that the watchdog is running and reachable."
     is SocketTimeoutException -> "The server took too long to respond. Trying again shortly."
-    is SSLException -> "Secure connection failed. Check the HTTPS certificate or use HTTP on your LAN."
+    is SSLException -> "Secure connection failed. Check the HTTPS certificate. Use HTTP only on a trusted private LAN or VPN; it does not encrypt credentials."
     is JSONException -> "The server returned an unreadable response."
     is IllegalArgumentException -> error.message ?: "Check the server address."
     else -> error.message?.take(120) ?: "Connection failed. Trying again shortly."
@@ -207,8 +207,9 @@ private fun HttpURLConnection.throwIfNotSuccessful() {
     throw ApiException(code, "HTTP $code${if (detail.isNotBlank()) ": ${detail.take(120)}" else ""}")
 }
 
-private suspend fun http(url: String, token: String, method: String = "GET", body: String? = null): String =
-    withContext(Dispatchers.IO) {
+private suspend fun http(url: String, token: String, method: String = "GET", body: String? = null): String {
+    demoApiResponse(url, token)?.let { return it }
+    return withContext(Dispatchers.IO) {
         val conn = (URL(url).openConnection() as HttpURLConnection).apply {
             connectTimeout = 8_000
             readTimeout = 15_000
@@ -227,9 +228,11 @@ private suspend fun http(url: String, token: String, method: String = "GET", bod
             conn.disconnect()
         }
     }
+}
 
-suspend fun streamAlerts(baseUrl: String, token: String, onAlerts: (List<Alert>) -> Unit): Unit =
-    withContext(Dispatchers.IO) {
+suspend fun streamAlerts(baseUrl: String, token: String, onAlerts: (List<Alert>) -> Unit): Unit {
+    if (isDemoConnection(baseUrl)) return demoAlertStream(token, onAlerts)
+    return withContext(Dispatchers.IO) {
         val conn = (URL(baseUrl.trimEnd('/') + "/api/v1/stream").openConnection() as HttpURLConnection).apply {
             connectTimeout = 8_000
             readTimeout = 30_000
@@ -257,6 +260,7 @@ suspend fun streamAlerts(baseUrl: String, token: String, onAlerts: (List<Alert>)
             conn.disconnect()
         }
     }
+}
 
 
 suspend fun fetchStatsResponse(baseUrl: String, token: String): StatsResponse {

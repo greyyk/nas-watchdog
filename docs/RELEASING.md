@@ -1,158 +1,113 @@
 # Releasing NAS Watchdog
 
-A pushed stable version tag produces all three distribution artifacts:
+A stable tag publishes the open-source distribution artifacts. It does **not** upload to Google Play, install an app, or reconfigure a running NAS.
 
 | Artifact | Destination |
 |---|---|
-| Signed Android APK | GitHub Release assets |
-| APK SHA-256 checksum | Same Release, in `SHA256SUMS.txt` |
-| Linux AMD64 container | GitHub Container Registry (GHCR), tagged with the version and `latest` |
+| Signed direct-install APK | GitHub Release: `nas-watchdog-<version>-android.apk` |
+| Signed Android App Bundle for Play | GitHub Release: `nas-watchdog-<version>-play.aab` |
+| SHA-256 checksums for both | Same GitHub Release: `SHA256SUMS.txt` |
+| Linux AMD64 watchdog | `ghcr.io/greyyk/nas-watchdog:<version>` and `:latest` |
 
-For the repository at `github.com/<owner>/<repository>`, the image is:
+The workflow accepts only `vMAJOR.MINOR.PATCH` tags, runs tests/lint, embeds tag-derived version metadata, verifies APK and AAB signing, builds/tests/pushes the image, and creates the Release only after all paths succeed.
 
-```text
-ghcr.io/<owner>/<repository>:<version>
-```
+## 1. Protect the persistent signing identity
 
-The workflow rejects nonstandard tag names, runs tests, creates version metadata, verifies the APK signature and pushed container, and only then publishes the GitHub Release with generated notes.
+The existing Android PKCS12 key is the long-lived project identity. The workflow reads these **encrypted GitHub Actions secrets**:
 
-## 1. One-time Android release signing
-
-**Do not skip this or use a debug key for public releases.** A persistent signing key lets Android recognize future APKs as updates from the same publisher. If you lose it, users may have to uninstall before installing later builds.
-
-Generate the key on a trusted workstation, outside this repository:
-
-```sh
-mkdir -p "$HOME/.private/nas-watchdog"
-chmod 700 "$HOME/.private/nas-watchdog"
-keytool -genkeypair -v \
-  -keystore "$HOME/.private/nas-watchdog/nas-watchdog-release.p12" \
-  -storetype PKCS12 \
-  -alias nas-watchdog \
-  -keyalg RSA \
-  -keysize 4096 \
-  -validity 10000
-```
-
-Use the same strong store and key password for PKCS12 compatibility. Save the password in a password manager and make a secure offline backup of both it and the `.p12` file. Never put either one in this repository, an issue, CI logs, or a NAS stats attachment.
-
-The certificate’s identifying name/organization can be your own public project identity; do not claim to be Zettlab.
-
-### Add GitHub Actions secrets
-
-Encode the keystore on the workstation.
-
-macOS:
-
-```sh
-base64 -i "$HOME/.private/nas-watchdog/nas-watchdog-release.p12" | pbcopy
-```
-
-Linux:
-
-```sh
-base64 -w0 "$HOME/.private/nas-watchdog/nas-watchdog-release.p12"
-# Copy the complete printed value to your password manager, then clear the screen.
-```
-
-Other platforms can use any standard base64 encoder, provided it produces a valid value without truncation.
-
-In GitHub open **Settings → Secrets and variables → Actions → New repository secret** and add:
-
-| Secret | Value |
+| Secret | Purpose |
 |---|---|
-| `ANDROID_KEYSTORE_BASE64` | Complete base64 keystore content, with no explanatory text |
+| `ANDROID_KEYSTORE_BASE64` | Complete base64 PKCS12 keystore |
 | `ANDROID_KEYSTORE_PASSWORD` | Keystore password |
-| `ANDROID_KEY_ALIAS` | `nas-watchdog` if you used the command above |
-| `ANDROID_KEY_PASSWORD` | Key password; normally the same as the store password here |
+| `ANDROID_KEY_ALIAS` | Existing alias, currently `nas-watchdog` |
+| `ANDROID_KEY_PASSWORD` | Key password |
+| `ANDROID_PLAY_KEYSTORE_BASE64` | Separate, base64 PKCS12 Play upload keystore |
+| `ANDROID_PLAY_KEYSTORE_PASSWORD` | Play upload keystore password |
+| `ANDROID_PLAY_KEY_ALIAS` | Play upload alias |
+| `ANDROID_PLAY_KEY_PASSWORD` | Play upload private-key password |
 
-The workflow decodes into the runner’s private temporary directory, checks the alias/password using `keytool`, signs the release, and deletes the runner afterward. Ordinary CI and local debug builds do not receive these secrets.
+A configuration repository variable, `BUNDLETOOL_SHA256`, pins the checksum of bundletool 1.18.2 used to validate the signed AAB. Never turn this into a moving/latest validator without a deliberate review and updated hash.
 
-If a tag release says a signing secret is missing, configure it rather than bypassing signing. Do not generate a new key for every release.
+The APK `release` build type uses the existing app/GitHub signing identity. The `play` build type uses the separate upload identity so the uploaded AAB is not misrepresented as the final Play-delivered app signature. The two public certificates are intentionally different; keep both backed up. Play's App integrity page—not this upload certificate alone—shows the effective distribution certificate.
 
-## 2. Prepare the release
+Do not regenerate this key for every release or commit it as `.p12`, `.jks`, `.keystore`, `.pfx`, base64, or plaintext. The workflow decodes the keystore only on its ephemeral runner and checks the alias/password without printing them. If a secret is absent, release signing fails rather than emitting an unsigned or debug-signed APK.
 
-1. Keep the main branch buildable and the ordinary CI workflow green.
-2. Review changes against the hardware compatibility/auth/action defaults.
-3. Update release notes/docs and choose the next version using semantic versioning.
-4. Ensure the source does not contain `.env`, local keystores, or personal defaults. Git ignores common local artifacts; review `git status --ignored` when in doubt.
+For this publication checkout, the private signing files are kept outside Git. Back up the complete directory securely with its password. Losing it can prevent compatible Android upgrades and complicate Play App Signing; disclosure risks malicious signing under the project's identity.
 
-The first release after the current app `1.3` / version code `4` could reasonably be `v1.4.0`, subject to your own versioning decision. Do not reuse existing tags.
-
-Release tags must be exactly:
-
-```text
-vMAJOR.MINOR.PATCH
-```
-
-Examples: `v1.4.0`, `v1.4.1`, `v2.0.0`. The current simple publication flow intentionally handles stable releases, not `-rc` prereleases.
-
-## 3. Publish
-
-From a clean, reviewed checkout:
+For a **new fork**, generate your own key on a trusted machine outside that fork's repository:
 
 ```sh
-git tag -a v1.4.0 -m "NAS Watchdog v1.4.0"
-git push origin v1.4.0
+mkdir -p "$HOME/.private/nas-watchdog-fork"
+chmod 700 "$HOME/.private/nas-watchdog-fork"
+keytool -genkeypair -v \
+  -keystore "$HOME/.private/nas-watchdog-fork/release.p12" \
+  -storetype PKCS12 -alias nas-watchdog \
+  -keyalg RSA -keysize 4096 -validity 10000
 ```
 
-Open **Actions → Release**. The workflow:
+Use a strong store/key password, keep an encrypted offline backup, then add your fork's own secrets through **Settings → Secrets and variables → Actions**. A fork must not reuse somebody else's identity, imply an official manufacturer relationship, or publish under `com.grey.naswatchdog` without deliberately managing that permanent package identity.
 
-1. Validates the tag.
-2. Runs Android release tests/lint, signs the APK from secrets, verifies it with `apksigner`, and stages `SHA256SUMS.txt`.
-3. Runs Go race tests and builds `linux/amd64` with the version embedded into the watchdog and OCI labels.
-4. Pushes `ghcr.io/<owner>/<repository>:1.4.0` and `:latest` using the workflow’s short-lived `GITHUB_TOKEN`.
-5. Inspects the result in GHCR.
-6. Publishes the GitHub Release and uploads the signed APK and checksum after both build paths succeed.
+## 2. Prepare and test
 
-The Android `versionName` comes from the tag without `v`. `versionCode` is the release workflow run number plus 1000, which keeps it above the existing development version code and monotonically increasing across new runs/tags. Keep the workflow path intact so the run-number sequence remains stable. Never rewrite/reuse a published tag.
+1. Finish review on `main`; keep normal CI green.
+2. Test Go, Android, web navigation/actions, API authorization, and the versioned container together.
+3. Keep actions and automatic reboot off by default. Check inventory-driven hardware behavior and D6U/D8U compatibility claims.
+4. Review third-party branding and original imagery in [TRADEMARKS.md](../TRADEMARKS.md).
+5. Update `defaultConfig` development version metadata in `android/app/build.gradle.kts`, installation examples, store release notes, and versioned image pins.
+6. Confirm no untracked `.env`, signing files, personal addresses, local SDK configuration, raw stats, secrets, or test logs are staged.
+7. Choose a **new** semantic version. Never rewrite/reuse a published tag or recycle an Android version code.
 
-After the first package publication, open the repository’s **Packages** entry and verify:
+Release CI sets `versionName` from the tag without `v`, and `versionCode = GITHUB_RUN_NUMBER + 1000`. This keeps production codes above the original development value and monotonically increasing on the release workflow's run-number sequence. Keep that workflow identity intact.
 
-- The package is linked to the repository (the workflow supplies the OCI source label).
-- Package visibility is **public** if you want anonymous users to pull it. First-published package visibility may depend on repository/account settings.
-- Both the exact version and `latest` tags show `linux/amd64`.
+## 3. Publish the GitHub Release and image
 
-If pushing GHCR is denied, check **Actions → General → Workflow permissions**, repository package permissions, and any organization policy that restricts `packages: write`. Do not replace the token with a broadly scoped personal access token stored publicly or permanently.
+From a clean reviewed checkout:
 
-## 4. Verify the released APK
+```sh
+git switch main
+git pull --ff-only
+git tag -a v1.5.0 -m "NAS Watchdog v1.5.0"
+git push origin main v1.5.0
+```
 
-Download `nas-watchdog-<version>-android.apk` and `SHA256SUMS.txt` into the same directory.
+Open **Actions → Release**. The jobs are:
 
-On macOS:
+1. **Validate:** stable tag syntax.
+2. **Android app:** release unit tests/lint, signed APK and AAB, `apksigner` verification for the APK and `jarsigner`/certificate checks for the bundle.
+3. **GHCR image:** race-enabled Go tests, `linux/amd64` build, version/source/revision labels, pushes exact version + `latest`, registry verification.
+4. **Release:** downloads staged app artifacts and publishes the APK, AAB, and combined `SHA256SUMS.txt`.
+
+The first publication of a GHCR package may need its visibility changed to **public** in package settings. The public `greyyk/nas-watchdog` package should be linked to this repository through its source label. Use `packages: write` on only the publishing job; use no long-lived registry PAT in source.
+
+The repository was formerly named `greyyk/zettlabs-nas-watchdog`. GitHub repository links redirect, but GHCR repositories do not become a universal redirect system. New deployments must use **ghcr.io/greyyk/nas-watchdog**. Retain `ghcr.io/greyyk/zettlabs-nas-watchdog:1.4.0` as an explicitly pinned old image only when still needed; upgrade deliberately.
+
+## 4. Verify a Release locally
+
+Download the APK, AAB, and `SHA256SUMS.txt` into one directory. On macOS:
 
 ```sh
 shasum -a 256 -c SHA256SUMS.txt
-adb install -r nas-watchdog-<version>-android.apk
+adb install -r nas-watchdog-1.5.0-android.apk
 ```
 
-On Linux:
+On Linux use `sha256sum -c SHA256SUMS.txt`. For the AAB, use `jarsigner -verify nas-watchdog-1.5.0-play.aab`; **do not use apksigner on an AAB**. Inspect the bundle in Play App Bundle Explorer after upload and compare its public certificates with the existing persistent release certificate.
+
+A debug APK signed by another local certificate cannot be updated directly by a production APK. Back up/re-enter connection settings and uninstall the old debug package if Android requires it. Do not uninstall production users' apps as a routine migration strategy. Installing the GitHub APK and Play edition works in place only when the application ID and effective **app signing certificate** are the same and the update version code is higher.
+
+## 5. Install or update the container on ZettOS
+
+Enable SSH and built-in Docker first using [SETUP.md](SETUP.md). From a reviewed release checkout's `watchdog/` directory, create `.env` if needed:
 
 ```sh
-sha256sum -c SHA256SUMS.txt
-adb install -r nas-watchdog-<version>-android.apk
-```
-
-Users switching from a locally built debug APK to the signed release may need to uninstall the debug build first because Android treats different signing certificates as different publishers. This clears local app settings; re-enter the server/token afterward. Keep the same release key for all future releases to enable normal upgrades.
-
-For phone-only installation, download the APK on the phone, verify the checksum on a trusted computer when possible, open the APK, and allow installation only for the file manager/browser you trust. Enter the NAS URL and token in Settings after Android connection verification.
-
-## 5. Use the GHCR image on ZettOS
-
-After [normal ZettOS preparation](SETUP.md#1-prepare-zettos) and copying the release’s `watchdog/` configuration:
-
-```sh
-cd /persistent/path/<repository>/watchdog
 cp .env.example .env
+openssl rand -hex 32
 ```
 
-Set your normal token/pool values and add:
+Set that random output in `WD_API_TOKEN`, check `POOL_HOST_PATH` against `findmnt -t btrfs`, and pin the published image:
 
 ```dotenv
-WATCHDOG_IMAGE=ghcr.io/<owner>/<repository>:1.4.0
+WATCHDOG_IMAGE=ghcr.io/greyyk/nas-watchdog:1.5.0
 ```
-
-Then:
 
 ```sh
 chmod 600 .env
@@ -161,14 +116,23 @@ sudo docker compose up -d --no-build
 sudo docker compose ps
 ```
 
-`--no-build` deliberately prevents a local source rebuild when a release image was requested. Use `WATCHDOG_IMAGE` without a line comment; replace `<owner>`, `<repository>`, and the version with complete values (no angle brackets).
+`pull`/`up --no-build` makes the remote-image choice explicit and prevents a local source rebuild. Use no inline comment after `WATCHDOG_IMAGE=...`, and keep the name digest/version deliberate rather than silently tracking `latest`. For a source build, remove/comment out `WATCHDOG_IMAGE` and run `sudo docker compose up -d --build`.
 
-Using `:<version>` rather than `:latest` is recommended so updates require an explicit reviewed choice. To update, change to the newly verified version and repeat `pull` / `up -d --no-build`. Native ZettOS source builds remain available with `sudo docker compose up -d --build` when `WATCHDOG_IMAGE` is unset or commented out.
+A public GHCR package needs no registry credential. The watchdog `WD_API_TOKEN` is separate from Docker registry access. Recreating the container clears in-memory history and bounded event history; the `watchdog-data` volume retains its selected alert/reboot operational state when you keep the same Compose project.
 
-No GHCR PAT is needed for a public package. If you deliberately keep the package private, the Docker host needs its own read-only package credentials outside the watchdog API token; do not confuse those identity systems.
+## 6. Google Play is a separate controlled step
+
+Follow **[PLAY_STORE.md](PLAY_STORE.md)**. In particular:
+
+- Choose Play App Signing and deliberately preserve or separate the GitHub/Play **app-signing** identity on first setup.
+- Upload the versioned **`.aab`**, not the GitHub APK.
+- Supply truthful privacy/Data Safety, foreground-service demo/declaration, original listing graphics/screenshots, compatibility limitations, and support contacts.
+- Start with Internal testing and install the Play-delivered version on real test devices. Account-specific closed testing may be required before production.
+
+There are no Play Console API credentials in GitHub Actions, and no automatic production Play rollout. Do not grant a cloud CI job production publishing rights without an independent security review.
 
 ## Failed or incomplete releases
 
-The GitHub Release is the final job, so a failed APK or container build should prevent it from being created. If the package uploaded but the final Release job failed, inspect permissions and create/fix the release after resolving the cause. Avoid retagging already consumed artifacts; a new patch version is the least ambiguous recovery.
+The Release job depends on the Android and container jobs; their failure prevents a normal Release from being created. If GHCR was updated but the final Release failed, fix permissions/network/root cause and use a new patch version for an unambiguous recovery rather than retagging consumed image tags. GitHub asset uploads and Play Console submission are separate operations.
 
-Publishing a container is not automatic NAS deployment, and publishing an APK is not automatic Android installation. Validate the actual upgrade before encouraging other users to install it.
+Container publication never deploys to a live NAS. App publication never installs onto a phone. Perform an actual upgrade validation before recommending a version broadly.

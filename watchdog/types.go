@@ -465,12 +465,14 @@ type Alert struct {
 }
 
 type WatchdogInfo struct {
-	Version        string `json:"version"`
-	IntervalSecs   int    `json:"interval_s"`
-	RebootEnabled  bool   `json:"reboot_enabled"`
-	ActionsEnabled bool   `json:"actions_enabled"`
-	RebootDelaySec int    `json:"reboot_delay_s"`
-	AlertCount     int    `json:"alert_count"`
+	Version      string `json:"version"`
+	IntervalSecs int    `json:"interval_s"`
+	// RebootEnabled controls the automatic recovery loop, not a user's
+	// explicitly confirmed manual reboot through the AllowActions gate.
+	RebootEnabled  bool `json:"reboot_enabled"`
+	ActionsEnabled bool `json:"actions_enabled"`
+	RebootDelaySec int  `json:"reboot_delay_s"`
+	AlertCount     int  `json:"alert_count"`
 }
 
 type Event struct {

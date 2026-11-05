@@ -4,7 +4,7 @@ Thanks for helping make NAS Watchdog useful beyond one D6U installation. The mos
 
 ## Ground rules
 
-- Keep hardware development focused on **ZettLabs NAS** systems and the primary **ZettOS** experience. Generic AMD64 Linux adaptations are welcome, but must not regress or complicate the validated ZettOS path.
+- Keep hardware development focused on compatible **Zettlab NAS** systems and the primary **ZettOS** experience. Generic AMD64 Linux adaptations are welcome, but must not regress or complicate the validated ZettOS path. This is an independent project: use third-party names only for factual compatibility and never claim endorsement or official status.
 - Preserve existing API fields and Android compatibility unless a versioned change is genuinely necessary.
 - Discover what the kernel/Docker exposes instead of hardcoding one owner’s bay counts, hwmon indexes, drive names, fan count, or applications.
 - Treat missing hardware and optional capabilities as normal. Do not invent substitute readings.
@@ -52,7 +52,7 @@ Review the generated CSS diff; do not commit `node_modules/`.
 
 ### Android
 
-Use JDK 17 and Android SDK platform 35:
+Use JDK 17 and Android SDK platform 36:
 
 ```sh
 cd android

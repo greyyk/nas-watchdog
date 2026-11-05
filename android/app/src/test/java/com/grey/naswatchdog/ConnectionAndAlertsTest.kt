@@ -38,6 +38,20 @@ class ConnectionAndAlertsTest {
     }
 
     @Test
+    fun `denied or failed alert notifications remain queued`() {
+        val alerts = listOf(alert("pool"), alert("disk"))
+        val denied = alertDeliveryPlan(alerts, setOf("old"), canDeliver = false)
+        assertTrue(denied.alerts.isEmpty())
+        assertTrue(denied.nextSeen.isEmpty())
+        assertEquals(2, alertDeliveryPlan(alerts, denied.nextSeen).alerts.size)
+
+        val first = alertDeliveryPlan(alerts, emptySet())
+        val afterFailedDisk = first.nextSeen - setOf("disk")
+        assertEquals(listOf("disk"), alertDeliveryPlan(alerts, afterFailedDisk).alerts.map { it.id })
+        // Removed alerts leave seen IDs; the existing resolution test below repeats them.
+    }
+
+    @Test
     fun `resolved alerts can notify again if they return`() {
         val current = listOf(alert("pool"), alert("disk"))
         val initial = alertDeliveryPlan(current, emptySet())

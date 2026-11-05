@@ -50,7 +50,7 @@ fun ActionsOverviewScreen(
     onRequestAction: (action: String, target: String, label: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val rebootAllowed = stats.actionsEnabled && stats.rebootEnabled
+    val rebootAllowed = stats.actionsEnabled
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -160,8 +160,7 @@ fun ActionsOverviewScreen(
                 )
                 if (!stats.rebootEnabled) {
                     Text(
-                        "Reboot is disabled. Set WD_ALLOW_REBOOT=true on the watchdog; " +
-                            "WD_ALLOW_ACTIONS=true must also be enabled.",
+                        "Automatic recovery reboot is off (WD_ALLOW_REBOOT=false). Manual reboot here still requires WD_ALLOW_ACTIONS=true and your explicit confirmation.",
                         style = MaterialTheme.typography.bodySmall,
                         color = Amber,
                     )

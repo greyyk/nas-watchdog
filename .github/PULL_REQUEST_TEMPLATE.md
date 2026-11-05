@@ -1,6 +1,6 @@
 ## Summary
 
-<!-- What changed, and which ZettLabs hardware/layout or user problem does it address? -->
+<!-- What changed, and which NAS hardware/layout or user problem does it address? -->
 
 ## Hardware / app context
 

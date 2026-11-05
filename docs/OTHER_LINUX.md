@@ -1,8 +1,8 @@
 # Running on another Linux operating system
 
-NAS Watchdog is **ZettOS-first**, but its collector and UI run in Docker and use standard Linux `/proc`, `/sys`, Docker, smartmontools, and btrfs interfaces. If you have replaced ZettOS on a supported AMD64 ZettLabs NAS—or are evaluating equivalent AMD64 hardware—you can adapt the same container.
+NAS Watchdog is **ZettOS-first**, but its collector and UI run in Docker and use standard Linux `/proc`, `/sys`, Docker, smartmontools, and btrfs interfaces. If you have replaced ZettOS on a supported AMD64 Zettlab NAS—or are evaluating equivalent AMD64 hardware—you can adapt the same container.
 
-This path is **experimental**. It does not mean every distribution, storage layout, hypervisor, RAID controller, or non-ZettLabs sensor is supported. The known-good combination remains **D6 Ultra + ZettOS + Linux AMD64**. D8 Ultra still needs owner validation. D4/D6 RK3588 ARM models are outside the current release even if you install another OS.
+This path is **experimental**. It does not mean every distribution, storage layout, hypervisor, RAID controller, or non-Zettlab sensor is supported. The known-good combination remains **D6 Ultra + ZettOS + Linux AMD64**. D8 Ultra still needs owner validation. D4/D6 RK3588 ARM models are outside the current release even if you install another OS.
 
 ## What transfers unchanged
 

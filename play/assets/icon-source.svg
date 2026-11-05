@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+ <title id="title">NAS Watchdog</title><desc id="desc">Original dark storage instrument with an independent heartbeat pulse</desc>
+ <rect width="512" height="512" fill="#080D10"/>
+ <rect x="62" y="64" width="388" height="384" rx="66" fill="#11191D" stroke="#2A383C" stroke-width="6"/>
+ <g fill="#19252A" stroke="#2A383C" stroke-width="4">
+  <rect x="106" y="103" width="96" height="82" rx="18"/><rect x="218" y="103" width="96" height="82" rx="18"/>
+  <rect x="330" y="103" width="76" height="82" rx="18"/><rect x="106" y="327" width="96" height="82" rx="18"/>
+  <rect x="218" y="327" width="96" height="82" rx="18"/><rect x="330" y="327" width="76" height="82" rx="18"/>
+ </g>
+ <path d="M92 252h65l30-77 46 158 32-114 26 49h131" fill="none" stroke="#8CE6C1" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+ <g fill="#9ABBD3"><circle cx="158" cy="144" r="9"/><circle cx="270" cy="144" r="9"/><circle cx="368" cy="144" r="9"/></g>
+ <g fill="#8CE6C1"><circle cx="158" cy="368" r="9"/><circle cx="270" cy="368" r="9"/><circle cx="368" cy="368" r="9"/></g>
+</svg>

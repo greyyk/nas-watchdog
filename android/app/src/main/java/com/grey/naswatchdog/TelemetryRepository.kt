@@ -55,6 +55,11 @@ private class TelemetryCache(context: Context) {
             }
         }
 
+    suspend fun clear() = withContext(Dispatchers.IO) {
+        // This is a fixed, app-private cache directory, never a user-supplied path.
+        directory.deleteRecursively()
+    }
+
     private fun fileFor(baseUrl: String, token: String) =
         File(directory, "${telemetryConnectionKey(baseUrl, token)}.json")
 
@@ -90,5 +95,11 @@ internal class TelemetryRepository(context: Context) {
     suspend fun persistNow(baseUrl: String, token: String, response: StatsResponse, now: Long = System.currentTimeMillis()) {
         cache.write(baseUrl, token, response, now)
         lastWriteAt = now
+    }
+
+    /** Removes all locally cached NAS snapshots, not data on the NAS. */
+    suspend fun clearLocalCaches() {
+        cache.clear()
+        lastWriteAt = 0L
     }
 }

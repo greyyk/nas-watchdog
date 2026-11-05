@@ -1,9 +1,12 @@
 {
   "name": "nas-watchdog-ui",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.5.0",
   "scripts": {
-    "build": "tailwindcss -i ./ui-src/input.css -o ./ui/app.css --minify"
+    "build": "tailwindcss -i ./ui-src/input.css -o ./ui/app.css --minify",
+    "check": "node --check ./ui/model.js && node --check ./ui/app.js",
+    "preview": "python3 ../scripts/dev_ui_server.py",
+    "test": "node --test ./tests/ui-model.test.js"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.11",

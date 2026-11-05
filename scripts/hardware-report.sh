@@ -1,5 +1,5 @@
 #!/bin/sh
-# Read-only ZettLabs hardware inventory for compatibility issues.
+# Read-only Zettlab hardware inventory for compatibility issues.
 # REVIEW every line before sharing. Do not add SMART, /stats, env, or raw logs:
 # those outputs can contain serials, tokens, addresses, process data, or secrets.
 set -eu
@@ -13,7 +13,7 @@ first_line() {
     fi
 }
 
-printf 'ZettLabs NAS Watchdog hardware report\n'
+printf 'NAS Watchdog hardware report\n'
 printf 'Model: %s\n' "${ZETTLABS_MODEL:-set ZETTLABS_MODEL before running}"
 printf 'Kernel architecture: '; uname -m
 printf 'Kernel release: '; uname -r

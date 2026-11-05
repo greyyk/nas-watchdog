@@ -158,10 +158,6 @@ fun HistoryChart(
                         ThresholdKind.CRITICAL -> Color(0xFFFF8589)
                     }
                     drawLine(color, Offset(bounds.left, y), Offset(bounds.right, y), 1.dp.toPx())
-                    labelPaint.color = color.toArgb()
-                    labelPaint.textAlign = Paint.Align.LEFT
-                    canvas.drawText(threshold.label, bounds.left + 4.dp.toPx(), y - 4.dp.toPx(), labelPaint)
-                    labelPaint.color = textColor.toArgb()
                 }
             }
 
@@ -205,6 +201,20 @@ fun HistoryChart(
                 drawLine(lineColor, Offset(x, bounds.top), Offset(x, bounds.bottom), 1.dp.toPx())
                 drawCircle(lineColor, 5.dp.toPx(), Offset(x, y))
                 drawCircle(surfaceColor, 2.dp.toPx(), Offset(x, y))
+            }
+        }
+        // Threshold annotations wrap as ordinary text below the plot, so large
+        // fonts and equivalent hardware limits cannot overlap chart samples.
+        series.thresholds.forEach { threshold ->
+            if (threshold.value.isFinite()) {
+                Text(
+                    "— ${threshold.label}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = when (threshold.kind) {
+                        ThresholdKind.WARNING -> Color(0xFFF2C078)
+                        ThresholdKind.CRITICAL -> Color(0xFFFF8589)
+                    },
+                )
             }
         }
         if (selection != null) {

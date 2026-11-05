@@ -1,6 +1,8 @@
 # ZettOS setup guide
 
-This is the recommended installation path for a compatible ZettLabs NAS running **ZettOS**. It takes you from enabling SSH to a verified dashboard, Android alerts, updates, and troubleshooting.
+This is the recommended installation path for a compatible Zettlab NAS running **ZettOS**. It takes you from enabling SSH to a verified dashboard, Android alerts, updates, and troubleshooting.
+
+**NAS Watchdog is unofficial, independent software.** It is not affiliated with or endorsed by Zettlab; no manufacturer firmware or proprietary application is included. Read [Third-party names and independence](../TRADEMARKS.md).
 
 **Validated hardware:** D6 Ultra (D6U) on ZettOS / `x86_64`. **D8 Ultra (D8U):** owner validation wanted. **D4/D6 ARM:** not supported yet. See [COMPATIBILITY.md](COMPATIBILITY.md).
 
@@ -67,7 +69,7 @@ Choose the pool’s own mountpoint—the `TARGET` column or second whitespace-se
 On your workstation, either clone the repository or choose **Code → Download ZIP** on GitHub and extract it:
 
 ```sh
-git clone https://github.com/<owner>/<repository>.git
+git clone https://github.com/greyyk/nas-watchdog.git
 ```
 
 Copy the complete repository to the NAS over SSH/SFTP. If Git is installed on ZettOS, cloning directly there also works.
@@ -143,7 +145,7 @@ The first build downloads the Go/Alpine build images and installs runtime tools 
 After the repository has a published release image, you can avoid compiling Go on the NAS. Keep the normal token/pool settings and add this to `.env`, replacing all placeholders:
 
 ```dotenv
-WATCHDOG_IMAGE=ghcr.io/<owner>/<repository>:1.4.0
+WATCHDOG_IMAGE=ghcr.io/greyyk/nas-watchdog:1.5.0
 ```
 
 Then pull and start that exact version:
@@ -153,7 +155,7 @@ sudo docker compose pull
 sudo docker compose up -d --no-build
 ```
 
-The image is `ghcr.io/<owner>/<repository>:<version>`. A corresponding `:latest` tag is also published, but pinning an exact version keeps updates deliberate. If later switching back to a local build, comment out `WATCHDOG_IMAGE` and run `sudo docker compose up -d --build`.
+The image is `ghcr.io/greyyk/nas-watchdog:<version>`. A corresponding `:latest` tag is also published, but pinning an exact version keeps updates deliberate. If later switching back to a local build, comment out `WATCHDOG_IMAGE` and run `sudo docker compose up -d --build`.
 
 Public GHCR packages need no registry token. The maintainer’s [release guide](RELEASING.md#5-use-the-ghcr-image-on-zettos) covers package visibility and first-time publication.
 
@@ -185,9 +187,17 @@ The dashboard is HTTP by design for direct LAN/VPN use. Do not port-forward it t
 
 ## 6. Install the Android app
 
+### Explore without a server
+
+On first launch choose **Explore synthetic demo**. This locally generated, clearly labeled preview needs no NAS, internet connection, or credentials. It is suitable for trying navigation, charts, logs, and notification controls. Actions are disabled. It does not demonstrate real host health or hardware compatibility.
+
+Use **Settings → Disconnect & clear local data** to remove the demo, connection credentials, preferences, and cached snapshots from this device without modifying a NAS.
+
 ### Install a signed release APK
 
-Once the repository’s release pipeline has published a version, download `nas-watchdog-<version>-android.apk` and `SHA256SUMS.txt` from that version’s GitHub Release.
+Once the repository’s release pipeline has published a version, download `nas-watchdog-<version>-android.apk` and `SHA256SUMS.txt` from that version’s GitHub Release. The `*-play.aab` asset is for Play Console upload and **cannot be installed with `adb`**; phone users should choose the APK or a published Play listing.
+
+During initial Play App Signing setup, preserve the existing classical app-signing certificate to allow in-place upgrades between the GitHub APK and Play-delivered builds on Android 16 and below. Follow [Signing strategy](PLAY_STORE.md#signing-strategy--decide-on-the-first-upload); a different signing identity can require uninstalling/reinstalling and losing local settings.
 
 Verify from a workstation before installing. On macOS:
 
@@ -216,7 +226,7 @@ For development or a custom build, compile the debug APK on a workstation.
 ### Requirements
 
 - JDK 17
-- Android SDK with platform 35 (Android Studio’s SDK Manager is the easiest route)
+- Android SDK with platform 36 (Android Studio’s SDK Manager is the easiest route)
 - Android 8.0 / API 26 or newer on the phone
 
 ### Build and install

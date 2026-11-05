@@ -9,13 +9,13 @@ body:
   - type: dropdown
     id: model
     attributes:
-      label: ZettLabs model
+      label: NAS model
       options:
         - D6U
         - D8U
         - D6 (ARM)
         - D4 (ARM)
-        - Other ZettLabs model
+        - Other Zettlab model
     validations:
       required: true
   - type: input

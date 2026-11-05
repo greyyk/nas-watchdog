@@ -57,15 +57,16 @@ fun ensureAlertChannel(ctx: Context) {
     )
 }
 
-fun canNotify(ctx: Context): Boolean {
+private fun canPostToChannel(ctx: Context, channelId: String): Boolean {
     val runtimePermission = Build.VERSION.SDK_INT < 33 ||
         ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) ==
         PackageManager.PERMISSION_GRANTED
     if (!runtimePermission || !NotificationManagerCompat.from(ctx).areNotificationsEnabled()) return false
-    val channel = ctx.getSystemService(NotificationManager::class.java)
-        ?.getNotificationChannel(CHANNEL_ALERTS)
+    val channel = ctx.getSystemService(NotificationManager::class.java)?.getNotificationChannel(channelId)
     return channel?.importance != NotificationManager.IMPORTANCE_NONE
 }
+
+fun canNotify(ctx: Context): Boolean = canPostToChannel(ctx, CHANNEL_ALERTS)
 
 private fun openAppIntent(ctx: Context): PendingIntent {
     val intent = Intent(ctx, MainActivity::class.java).apply {
@@ -87,16 +88,18 @@ private fun monitorNotification(ctx: Context, status: String): Notification =
         .setCategory(NotificationCompat.CATEGORY_SERVICE)
         .setPriority(NotificationCompat.PRIORITY_LOW)
         .setContentIntent(openAppIntent(ctx))
+        .addAction(0, "Open NAS Watchdog", openAppIntent(ctx))
         .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
         .build()
 
+/** Returns false when the alert remains eligible for a later notification attempt. */
 fun notifyAlert(
     ctx: Context,
     title: String,
     body: String,
     id: Int = (System.currentTimeMillis() % 100000).toInt(),
-) {
-    if (!canNotify(ctx)) return
+): Boolean {
+    if (!canNotify(ctx)) return false
     ensureAlertChannel(ctx)
     val notification = NotificationCompat.Builder(ctx, CHANNEL_ALERTS)
         .setSmallIcon(R.drawable.ic_notification)
@@ -108,53 +111,62 @@ fun notifyAlert(
         .setAutoCancel(true)
         .setContentIntent(openAppIntent(ctx))
         .build()
-    try {
+    return try {
         NotificationManagerCompat.from(ctx).notify(id, notification)
-    } catch (_: SecurityException) {
+        true
+    } catch (e: SecurityException) {
         // Permission can be revoked between the check and posting the notification.
+        android.util.Log.w("NASWatchdog", "Notification permission was revoked", e)
+        false
     }
 }
 
 internal data class AlertDeliveryPlan(val alerts: List<Alert>, val nextSeen: Set<String>)
 
-internal fun alertDeliveryPlan(active: List<Alert>, seen: Set<String>): AlertDeliveryPlan {
-    val currentIds = active.map { it.id }.filter { it.isNotBlank() }.toSet()
+internal fun alertDeliveryPlan(active: List<Alert>, seen: Set<String>, canDeliver: Boolean = true): AlertDeliveryPlan {
+    val currentIds = active.mapTo(HashSet()) { it.id }.apply { remove("") }
+    val retainedSeen = currentIds.filterTo(HashSet()) { it in seen }
+    if (!canDeliver) return AlertDeliveryPlan(emptyList(), retainedSeen)
     val toDeliver = active.filter { it.id.isNotBlank() && it.id !in seen }.take(5)
     val deliveredIds = toDeliver.mapTo(HashSet()) { it.id }
-    val nextSeen = currentIds.filterTo(HashSet()) { it in seen || it in deliveredIds }
-    return AlertDeliveryPlan(toDeliver, nextSeen)
+    return AlertDeliveryPlan(toDeliver, retainedSeen + deliveredIds)
 }
 
 private fun deliverActiveAlerts(ctx: Context, alerts: List<Alert>) {
     synchronized(alertDeliveryLock) {
         val prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val seen = prefs.getStringSet("seen_alerts", emptySet())?.toSet() ?: emptySet()
-        val plan = alertDeliveryPlan(alerts, seen)
-        plan.alerts.forEach { alert ->
+        val plan = alertDeliveryPlan(alerts, seen, canNotify(ctx))
+        val failed = plan.alerts.filterNot { alert ->
             notifyAlert(ctx, alert.title, alert.detail, alert.id.hashCode())
-        }
-        // Keep unseen alerts queued instead of marking the whole response as delivered.
-        prefs.edit().putStringSet("seen_alerts", plan.nextSeen).commit()
+        }.mapTo(HashSet()) { it.id }
+        val nextSeen = plan.nextSeen - failed
+        // Keep denied/failed and overflow alerts queued for the next check. Do not
+        // write the preference on every SSE event when no delivery state changed.
+        if (seen != nextSeen) prefs.edit().putStringSet("seen_alerts", nextSeen).apply()
     }
 }
 
 private fun recordBackgroundSuccess(ctx: Context) {
-    ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-        .putLong("last_background_success", System.currentTimeMillis())
-        .remove("last_background_error")
-        .apply()
+    val prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    val now = System.currentTimeMillis()
+    val previous = prefs.getLong("last_background_success", 0L)
+    val error = prefs.getString("last_background_error", null)
+    if (previous > 0L && now - previous < 60_000L && error == null) return
+    prefs.edit().putLong("last_background_success", now).remove("last_background_error").apply()
 }
 
 private fun recordBackgroundError(ctx: Context, error: Throwable) {
-    ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-        .putString("last_background_error", connectionError(error))
-        .apply()
+    val message = connectionError(error).take(300)
+    val prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    if (prefs.getString("last_background_error", null) == message) return
+    prefs.edit().putString("last_background_error", message).apply()
 }
 
 class AlertWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
     override suspend fun doWork(): Result {
         val prefs = applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        if (!prefs.getBoolean("notifications", true)) return Result.success()
+        if (!prefs.getBoolean("notifications", false)) return Result.success()
         val base = prefs.getString("baseUrl", "").orEmpty()
         if (base.isBlank()) return Result.success()
         val token = prefs.getString("token", "").orEmpty()
@@ -183,8 +195,8 @@ class AlertMonitorService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        if (!prefs.getBoolean("notifications", true) ||
-            !prefs.getBoolean("live_monitoring", true) ||
+        if (!prefs.getBoolean("notifications", false) ||
+            !prefs.getBoolean("live_monitoring", false) ||
             prefs.getString("baseUrl", "").isNullOrBlank()
         ) {
             stopSelf()
@@ -192,13 +204,20 @@ class AlertMonitorService : Service() {
         }
 
         ensureAlertChannel(this)
-        ServiceCompat.startForeground(
-            this,
-            MONITOR_NOTIFICATION_ID,
-            monitorNotification(this, "Connecting to your NAS…"),
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else 0,
-        )
+        try {
+            ServiceCompat.startForeground(
+                this,
+                MONITOR_NOTIFICATION_ID,
+                monitorNotification(this, "Connecting to your NAS…"),
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else 0,
+            )
+        } catch (e: RuntimeException) {
+            android.util.Log.w("NASWatchdog", "Could not start foreground monitoring", e)
+            recordBackgroundError(this, e)
+            stopSelf(startId)
+            return START_NOT_STICKY
+        }
         updateStatus("Connecting to your NAS…")
 
         monitorJob?.cancel()
@@ -210,8 +229,8 @@ class AlertMonitorService : Service() {
         var failures = 0
         while (true) {
             val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            if (!prefs.getBoolean("notifications", true) ||
-                !prefs.getBoolean("live_monitoring", true)
+            if (!prefs.getBoolean("notifications", false) ||
+                !prefs.getBoolean("live_monitoring", false)
             ) {
                 stopSelf()
                 return
@@ -250,7 +269,7 @@ class AlertMonitorService : Service() {
     private fun updateStatus(status: String) {
         if (status == lastStatus) return
         lastStatus = status
-        if (canNotify(this)) {
+        if (canPostToChannel(this, CHANNEL_MONITOR)) {
             try {
                 NotificationManagerCompat.from(this)
                     .notify(MONITOR_NOTIFICATION_ID, monitorNotification(this, status))
@@ -295,8 +314,8 @@ fun scheduleAlertWorker(ctx: Context) {
 fun syncAlertMonitoring(ctx: Context) {
     val app = ctx.applicationContext
     val prefs = app.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-    val shouldRun = prefs.getBoolean("notifications", true) &&
-        prefs.getBoolean("live_monitoring", true) &&
+    val shouldRun = prefs.getBoolean("notifications", false) &&
+        prefs.getBoolean("live_monitoring", false) &&
         !prefs.getString("baseUrl", "").isNullOrBlank()
     if (shouldRun) {
         try {

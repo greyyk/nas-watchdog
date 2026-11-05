@@ -1,0 +1,228 @@
+{
+  "synthetic": true,
+  "description": "Entirely synthetic UI telemetry for the generic host sample-nas. No live system, user, credential, network location, or private identity is represented. SATA SMART tables are intentionally short examples; every supplied row is rendered.",
+  "coverage_notes": [
+    "Eight SATA devices and two NVMe devices, including two NVMe temperature channels each.",
+    "DIMM0 is present; DIMM1 and chassis ambient sensors are deliberately absent rather than fabricated.",
+    "The intake fan reports a real zero RPM value; it must not be changed to missing.",
+    "One container is stopped and one running container is unhealthy.",
+    "History includes omitted temperature and fan keys to exercise null gaps."
+  ],
+  "stats": {
+    "ts": "2026-01-02T12:10:00Z",
+    "host": {
+      "hostname": "sample-nas",
+      "kernel": "6.12.0-synthetic",
+      "os": "Sample Linux",
+      "uptime_s": 1045800,
+      "boot_id": "00000000-0000-0000-0000-000000000000",
+      "load1": 1.26,
+      "load5": 0.92,
+      "load15": 0.74,
+      "procs": 214,
+      "threads": 1042,
+      "cpu_model": "Synthetic 8-core processor",
+      "cpu_cores": 4
+    },
+    "cpu": {
+      "usage_pct": 32.7,
+      "per_core": [44, 21, 36, 15, 48, 24, 31, 17],
+      "user_pct": 19.8,
+      "sys_pct": 8.1,
+      "iowait_pct": 3.2,
+      "irq_pct": 0.9,
+      "steal_pct": 0,
+      "idle_pct": 67.3,
+      "freq_mhz": 2480,
+      "cores": 4,
+      "threads": 8,
+      "governor": "schedutil",
+      "max_freq_mhz": 3800,
+      "per_core_detail": [
+        { "id": 0, "usage": 44, "freq_mhz": 2800 },
+        { "id": 1, "usage": 21, "freq_mhz": 2600 },
+        { "id": 2, "usage": 36, "freq_mhz": 2500 },
+        { "id": 3, "usage": 15, "freq_mhz": 2200 },
+        { "id": 4, "usage": 48, "freq_mhz": 2700 },
+        { "id": 5, "usage": 24, "freq_mhz": 2400 },
+        { "id": 6, "usage": 31, "freq_mhz": 2300 },
+        { "id": 7, "usage": 17, "freq_mhz": 2100 }
+      ],
+      "c_states": [
+        { "name": "C1", "count": 280901, "time_ms": 3600000, "latency_us": 2 },
+        { "name": "C6", "count": 198440, "time_ms": 7200000, "latency_us": 80 }
+      ],
+      "throttle": { "package_count": 2, "package_total_ms": 450, "core_count": 1, "core_total_ms": 180 }
+    },
+    "memory": {
+      "total": 34359738368,
+      "free": 3221225472,
+      "available": 19327352832,
+      "used": 12884901888,
+      "used_pct": 37.5,
+      "buffers": 1073741824,
+      "cached": 7516192768,
+      "dirty": 16777216,
+      "writeback": 0,
+      "slab": 1610612736,
+      "sreclaimable": 805306368,
+      "swap_total": 8589934592,
+      "swap_free": 8000000000,
+      "swap_used": 589934592,
+      "swap_pct": 6.9,
+      "oom_kills": 0,
+      "page_faults": 9321450,
+      "major_faults": 4201
+    },
+    "pressure": {
+      "cpu": { "some10": 8.2, "some60": 4.1, "some300": 2.8, "full10": 0, "full60": 0, "full300": 0 },
+      "memory": { "some10": 1.4, "some60": 0.8, "some300": 0.5, "full10": 0.1, "full60": 0, "full300": 0 },
+      "io": { "some10": 4.6, "some60": 2.9, "some300": 1.8, "full10": 0.7, "full60": 0.4, "full300": 0.2 }
+    },
+    "pool": {
+      "path": "/pool",
+      "host_path": "/srv/pool",
+      "device": "/dev/md0",
+      "read_only": false,
+      "expected_rw": true,
+      "total_bytes": 32000000000000,
+      "used_bytes": 18900000000000,
+      "free_bytes": 13100000000000,
+      "used_pct": 59.1,
+      "device_stats": { "corruption_errs": 0, "write_io_errs": 1, "read_io_errs": 0, "flush_io_errs": 0, "generation_errs": 0 },
+      "corruption_total": 0,
+      "status": "mounted"
+    },
+    "btrfs": {
+      "device_stats": { "corruption_errs": 0, "write_io_errs": 1, "read_io_errs": 0, "flush_io_errs": 0, "generation_errs": 0 },
+      "df": {
+        "Data": { "profile": "RAID1", "total": 15000000000000, "used": 11200000000000 },
+        "Metadata": { "profile": "RAID1", "total": 48000000000, "used": 17500000000 },
+        "System": { "profile": "RAID1", "total": 32000000, "used": 14000000 }
+      },
+      "scrub": {
+        "status": "finished",
+        "started": "2026-01-02T02:00:00Z",
+        "duration_s": 14820,
+        "data_bytes_scrubbed": 11200000000000,
+        "tree_bytes_scrubbed": 17500000000,
+        "read_errors": 0,
+        "csum_errors": 0,
+        "verify_errors": 0,
+        "uncorrectable_errors": 0,
+        "corrected_errors": 0,
+        "progress_pct": 100
+      }
+    },
+    "mounts": [
+      { "device": "/dev/md0", "target": "/srv/pool", "fstype": "btrfs", "ro": false, "options": "rw,relatime,space_cache=v2", "total": 32000000000000, "used": 18900000000000, "free": 13100000000000, "used_pct": 59.1 },
+      { "device": "/dev/nvme0n1p1", "target": "/srv/system", "fstype": "ext4", "ro": false, "options": "rw,relatime", "total": 500000000000, "used": 128000000000, "free": 372000000000, "used_pct": 25.6 },
+      { "device": "tmpfs", "target": "/run", "fstype": "tmpfs", "ro": false, "options": "rw,nosuid,nodev", "total": 3435973836, "used": 12000000, "free": 3423973836, "used_pct": 0.3 }
+    ],
+    "temps": [
+      { "key": "cpu", "label": "CPU package", "c": 58.4, "warn": 82, "crit": 96, "category": "cpu_package", "source": "hwmon", "chip": "sample-core", "sensor": "package", "limits": { "max_c": 100, "crit_c": 100, "emergency_c": 105 }, "alarms": [] },
+      { "key": "cpu_core_0", "label": "Physical core 0", "c": 54.1, "warn": 82, "crit": 96, "category": "cpu_core", "source": "hwmon", "chip": "sample-core", "sensor": "core0", "core_type": "performance", "cpus": [0, 1], "limits": { "crit_c": 100 } },
+      { "key": "cpu_core_1", "label": "Physical core 1", "c": 56.7, "warn": 82, "crit": 96, "category": "cpu_core", "source": "hwmon", "chip": "sample-core", "sensor": "core1", "core_type": "performance", "cpus": [2, 3], "limits": { "crit_c": 100 } },
+      { "key": "cpu_core_2", "label": "Physical core 2", "c": 49.9, "warn": 82, "crit": 96, "category": "cpu_core", "source": "hwmon", "chip": "sample-core", "sensor": "core2", "core_type": "efficiency", "cpus": [4, 5], "limits": { "crit_c": 100 } },
+      { "key": "cpu_core_3", "label": "Physical core 3", "c": 48.2, "warn": 82, "crit": 96, "category": "cpu_core", "source": "hwmon", "chip": "sample-core", "sensor": "core3", "core_type": "efficiency", "cpus": [6, 7], "limits": { "crit_c": 100 } },
+      { "key": "dimm0", "label": "DIMM0", "c": 43.6, "warn": 75, "crit": 85, "category": "dimm", "source": "hwmon", "chip": "sample-memory", "device": "DIMM0" },
+      { "key": "board", "label": "Board controller", "c": 39.8, "warn": 72, "crit": 85, "category": "board", "source": "hwmon", "chip": "sample-board" },
+      { "key": "nvme0", "label": "NVMe 0 composite", "c": 46.2, "warn": 75, "crit": 85, "category": "nvme", "source": "hwmon", "chip": "nvmem", "device": "/dev/nvme0", "sensor": "composite", "limits": { "max_c": 80, "crit_c": 85 } },
+      { "key": "nvme0_sensor_1", "label": "NVMe 0 controller channel 1", "c": 49.7, "warn": 78, "crit": 86, "category": "nvme", "source": "hwmon", "chip": "nvmem", "device": "/dev/nvme0", "sensor": "1", "limits": { "max_c": 82, "crit_c": 86 } },
+      { "key": "nvme1", "label": "NVMe 1 composite", "c": 44.8, "warn": 75, "crit": 85, "category": "nvme", "source": "hwmon", "chip": "nvmem", "device": "/dev/nvme1", "sensor": "composite", "limits": { "max_c": 80, "crit_c": 85 } },
+      { "key": "nvme1_sensor_1", "label": "NVMe 1 controller channel 1", "c": 47.1, "warn": 78, "crit": 86, "category": "nvme", "source": "hwmon", "chip": "nvmem", "device": "/dev/nvme1", "sensor": "1", "limits": { "max_c": 82, "crit_c": 86 } },
+      { "key": "hdd_sdc", "label": "SATA sdc temperature", "c": 51.4, "warn": 50, "crit": 60, "category": "hdd", "source": "smart", "device": "/dev/sdc", "alarms": ["temp_warn"] },
+      { "key": "hdd_sda", "label": "SATA sda temperature", "c": 37.5, "warn": 50, "crit": 60, "category": "hdd", "source": "smart", "device": "/dev/sda" },
+      { "key": "hdd_sdb", "label": "SATA sdb temperature", "c": 38.1, "warn": 50, "crit": 60, "category": "hdd", "source": "smart", "device": "/dev/sdb" }
+    ],
+    "thermal_zones": [
+      { "key": "zone_x86_pkg", "label": "Firmware package zone", "c": 57.2, "mode": "enabled", "policy": "step_wise", "trips": [{ "index": 0, "type": "passive", "temp_c": 82, "hyst_c": 2 }, { "index": 1, "type": "critical", "temp_c": 100, "hyst_c": 0 }] }
+    ],
+    "fans": [
+      { "key": "cpu_fan", "label": "CPU fan", "rpm": 1450, "pwm": 128 },
+      { "key": "rear_fan", "label": "Rear exhaust", "rpm": 1100, "pwm": 102 },
+      { "key": "intake_fan", "label": "Front intake", "rpm": 0, "pwm": 0 }
+    ],
+    "raid": [
+      { "name": "md0", "level": "raid1", "state": "active", "members": "sda1 sdb1", "degraded": false, "sync": "clean", "detail": "Synthetic mirror pair" }
+    ],
+    "disks": [
+      { "name": "sda", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-001", "size_bytes": 4000000000000, "rotational": true, "read_bytes": 12000000000000, "write_bytes": 9000000000000, "read_rate": 52428800, "write_rate": 15728640, "read_iops": 42, "write_iops": 18, "util_pct": 18.2, "io_ms": 4.1 },
+      { "name": "sdb", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-002", "size_bytes": 4000000000000, "rotational": true, "read_bytes": 11000000000000, "write_bytes": 8900000000000, "read_rate": 20971520, "write_rate": 10485760, "read_iops": 25, "write_iops": 12, "util_pct": 12.4, "io_ms": 5.3 },
+      { "name": "sdc", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-003", "size_bytes": 4000000000000, "rotational": true, "read_bytes": 16000000000000, "write_bytes": 9200000000000, "read_rate": 10485760, "write_rate": 5242880, "read_iops": 15, "write_iops": 8, "util_pct": 8.1, "io_ms": 6.2 },
+      { "name": "sdd", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-004", "size_bytes": 4000000000000, "rotational": true, "read_bytes": 10000000000000, "write_bytes": 8800000000000, "read_rate": 0, "write_rate": 2097152, "read_iops": 0, "write_iops": 4, "util_pct": 2.6, "io_ms": 3.6 },
+      { "name": "sde", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-005", "size_bytes": 4000000000000, "rotational": true, "read_bytes": 9000000000000, "write_bytes": 8000000000000, "read_rate": 1048576, "write_rate": 1048576, "read_iops": 2, "write_iops": 2, "util_pct": 1.1, "io_ms": 4.4 },
+      { "name": "sdf", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-006", "size_bytes": 4000000000000, "rotational": true, "read_bytes": 8000000000000, "write_bytes": 7800000000000, "read_rate": 0, "write_rate": 0, "read_iops": 0, "write_iops": 0, "util_pct": 0, "io_ms": 2.2 },
+      { "name": "sdg", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-007", "size_bytes": 4000000000000, "rotational": true, "read_bytes": 7000000000000, "write_bytes": 7000000000000, "read_rate": 2097152, "write_rate": 0, "read_iops": 3, "write_iops": 0, "util_pct": 1.4, "io_ms": 3.1 },
+      { "name": "sdh", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-008", "size_bytes": 4000000000000, "rotational": true, "read_bytes": 6500000000000, "write_bytes": 6800000000000, "read_rate": 0, "write_rate": 1048576, "read_iops": 0, "write_iops": 2, "util_pct": 0.9, "io_ms": 2.8 },
+      { "name": "nvme0n1", "model": "NVME-DEMO-1T", "serial": "NVME-SYN-001", "size_bytes": 1000000000000, "rotational": false, "read_bytes": 24000000000000, "write_bytes": 14000000000000, "read_rate": 104857600, "write_rate": 31457280, "read_iops": 2400, "write_iops": 800, "util_pct": 22.8, "io_ms": 0.7 },
+      { "name": "nvme1n1", "model": "NVME-DEMO-1T", "serial": "NVME-SYN-002", "size_bytes": 1000000000000, "rotational": false, "read_bytes": 20000000000000, "write_bytes": 13000000000000, "read_rate": 20971520, "write_rate": 5242880, "read_iops": 500, "write_iops": 200, "util_pct": 6.4, "io_ms": 0.9 }
+    ],
+    "smart": [
+      { "device": "/dev/sda", "type": "sata", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-001", "health": "PASSED", "temperature": 37.5, "temperature_min_c": 21, "temperature_max_c": 46, "power_on_hours": 9600, "reallocated": 0, "pending": 0, "uncorrectable": 0, "crc_errors": 0, "percentage_used": 0, "media_errors": 0, "table": [{ "id": 5, "name": "Reallocated_Sector_Ct", "value": 100, "worst": 100, "thresh": 10, "raw_value": 0, "raw_text": "0" }, { "id": 194, "name": "Temperature_Celsius", "value": 111, "worst": 102, "thresh": 0, "raw_value": 37, "raw_text": "37 (Min/Max 21/46)" }] },
+      { "device": "/dev/sdb", "type": "sata", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-002", "health": "PASSED", "temperature": 38.1, "temperature_min_c": 20, "temperature_max_c": 47, "power_on_hours": 9600, "reallocated": 0, "pending": 0, "uncorrectable": 0, "crc_errors": 0, "percentage_used": 0, "media_errors": 0, "table": [{ "id": 5, "name": "Reallocated_Sector_Ct", "value": 100, "worst": 100, "thresh": 10, "raw_value": 0, "raw_text": "0" }, { "id": 199, "name": "UDMA_CRC_Error_Count", "value": 100, "worst": 100, "thresh": 0, "raw_value": 0, "raw_text": "0" }] },
+      { "device": "/dev/sdc", "type": "sata", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-003", "health": "PASSED", "temperature": 51.4, "temperature_min_c": 24, "temperature_max_c": 52, "power_on_hours": 10220, "reallocated": 0, "pending": 2, "uncorrectable": 0, "crc_errors": 0, "percentage_used": 0, "media_errors": 0, "table": [{ "id": 5, "name": "Reallocated_Sector_Ct", "value": 100, "worst": 100, "thresh": 10, "raw_value": 0, "raw_text": "0" }, { "id": 197, "name": "Current_Pending_Sector", "value": 100, "worst": 100, "thresh": 0, "raw_value": 2, "raw_text": "2" }] },
+      { "device": "/dev/sdd", "type": "sata", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-004", "health": "PASSED", "temperature": 36.9, "power_on_hours": 8800, "reallocated": 0, "pending": 0, "uncorrectable": 0, "crc_errors": 0, "percentage_used": 0, "media_errors": 0, "table": [{ "id": 5, "name": "Reallocated_Sector_Ct", "value": 100, "worst": 100, "thresh": 10, "raw_value": 0, "raw_text": "0" }] },
+      { "device": "/dev/sde", "type": "sata", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-005", "health": "PASSED", "temperature": 35.6, "power_on_hours": 8800, "reallocated": 0, "pending": 0, "uncorrectable": 0, "crc_errors": 0, "percentage_used": 0, "media_errors": 0, "table": [{ "id": 194, "name": "Temperature_Celsius", "value": 112, "worst": 105, "thresh": 0, "raw_value": 35, "raw_text": "36" }] },
+      { "device": "/dev/sdf", "type": "sata", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-006", "health": "PASSED", "temperature": 35.1, "power_on_hours": 8400, "reallocated": 0, "pending": 0, "uncorrectable": 0, "crc_errors": 0, "percentage_used": 0, "media_errors": 0, "table": [{ "id": 5, "name": "Reallocated_Sector_Ct", "value": 100, "worst": 100, "thresh": 10, "raw_value": 0, "raw_text": "0" }] },
+      { "device": "/dev/sdg", "type": "sata", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-007", "health": "PASSED", "temperature": 34.8, "power_on_hours": 8400, "reallocated": 0, "pending": 0, "uncorrectable": 0, "crc_errors": 0, "percentage_used": 0, "media_errors": 0, "table": [{ "id": 194, "name": "Temperature_Celsius", "value": 113, "worst": 104, "thresh": 0, "raw_value": 34, "raw_text": "35" }] },
+      { "device": "/dev/sdh", "type": "sata", "model": "SATA-DEMO-4T", "serial": "SATA-SYN-008", "health": "PASSED", "temperature": 0, "power_on_hours": 8000, "reallocated": 0, "pending": 0, "uncorrectable": 0, "crc_errors": 3, "percentage_used": 0, "media_errors": 0, "table": [{ "id": 199, "name": "UDMA_CRC_Error_Count", "value": 99, "worst": 99, "thresh": 0, "raw_value": 3, "raw_text": "3" }] },
+      { "device": "/dev/nvme0n1", "type": "nvme", "model": "NVME-DEMO-1T", "serial": "NVME-SYN-001", "health": "PASSED", "temperature": 46.2, "temperature_min_c": 22, "temperature_max_c": 61, "power_on_hours": 5400, "reallocated": 0, "pending": 0, "uncorrectable": 0, "crc_errors": 0, "percentage_used": 8, "media_errors": 0, "data_units_read": 24000000, "data_units_written": 14000000, "unsafe_shutdowns": 2, "available_spare": 100, "attributes": { "critical_warning": 0, "thermal_management_transition_count": 0 } },
+      { "device": "/dev/nvme1n1", "type": "nvme", "model": "NVME-DEMO-1T", "serial": "NVME-SYN-002", "health": "PASSED", "temperature": 44.8, "temperature_min_c": 20, "temperature_max_c": 58, "power_on_hours": 5300, "reallocated": 0, "pending": 0, "uncorrectable": 0, "crc_errors": 0, "percentage_used": 6, "media_errors": 0, "data_units_read": 20000000, "data_units_written": 13000000, "unsafe_shutdowns": 1, "available_spare": 100, "attributes": { "critical_warning": 0, "thermal_management_transition_count": 1 } }
+    ],
+    "net": [
+      { "name": "eth0", "state": "up", "speed_mbps": 2500, "rx_bytes": 8900000000000, "tx_bytes": 5600000000000, "rx_rate": 83886080, "tx_rate": 20971520, "rx_packets": 92000000, "tx_packets": 68000000, "rx_errs": 0, "tx_errs": 0, "rx_drops": 2, "tx_drops": 0, "mac": "02:00:00:00:00:01", "mtu": 1500, "duplex": "full", "virtual": false },
+      { "name": "eth1", "state": "down", "speed_mbps": 0, "rx_bytes": 0, "tx_bytes": 0, "rx_rate": 0, "tx_rate": 0, "rx_packets": 0, "tx_packets": 0, "rx_errs": 0, "tx_errs": 0, "rx_drops": 0, "tx_drops": 0, "mac": "02:00:00:00:00:02", "mtu": 1500, "duplex": "unknown", "virtual": false },
+      { "name": "vnet-demo", "state": "up", "speed_mbps": 0, "rx_bytes": 22000000, "tx_bytes": 42000000, "rx_rate": 10240, "tx_rate": 20480, "rx_packets": 44000, "tx_packets": 45000, "rx_errs": 0, "tx_errs": 0, "rx_drops": 0, "tx_drops": 0, "mac": "02:00:00:00:00:10", "mtu": 1500, "duplex": "full", "virtual": true }
+    ],
+    "containers": [
+      { "name": "media-api", "id": "synthetic01", "image": "example.invalid/media:demo", "state": "running", "status": "Up 12 days", "health": "healthy", "created": "2025-12-21T08:00:00Z", "restart_count": 1, "cpu_pct": 12.4, "mem_usage": 805306368, "mem_limit": 2147483648, "mem_pct": 37.5, "net_rx": 500000000, "net_tx": 900000000, "block_read": 80000000, "block_write": 50000000, "ports": ["8080->80/tcp"] },
+      { "name": "sync-runner", "id": "synthetic02", "image": "example.invalid/sync:demo", "state": "running", "status": "Up 40 minutes (unhealthy)", "health": "unhealthy", "created": "2025-12-20T09:00:00Z", "restart_count": 4, "cpu_pct": 2.8, "mem_usage": 268435456, "mem_limit": 1073741824, "mem_pct": 25, "net_rx": 20000000, "net_tx": 18000000, "block_read": 12000000, "block_write": 24000000, "ports": [] },
+      { "name": "old-index", "id": "synthetic03", "image": "example.invalid/index:demo", "state": "exited", "status": "Exited (0) 2 days ago", "health": "none", "created": "2025-12-19T10:00:00Z", "restart_count": 0, "cpu_pct": 0, "mem_usage": 0, "mem_limit": 536870912, "mem_pct": 0, "net_rx": 0, "net_tx": 0, "block_read": 0, "block_write": 0, "ports": ["9090->9090/tcp"] }
+    ],
+    "docker": { "version": "demo-engine", "api_version": "synthetic", "driver": "overlay-demo", "storage_driver": "overlay-demo", "running": 2, "paused": 0, "stopped": 1, "images": 7, "ncpu": 8, "mem_total": 34359738368, "operating_system": "Sample Linux" },
+    "processes": [
+      { "pid": 100, "name": "watchdog", "state": "S", "cpu_pct": 1.2, "mem_pct": 0.1, "rss": 52428800, "threads": 8, "cmdline": "/usr/local/bin/nas-watchdog --synthetic" },
+      { "pid": 220, "name": "media-api", "state": "S", "cpu_pct": 12.4, "mem_pct": 2.3, "rss": 805306368, "threads": 14, "cmdline": "demo-media --config /etc/demo/media.json" },
+      { "pid": 305, "name": "sync-runner", "state": "S", "cpu_pct": 2.8, "mem_pct": 0.8, "rss": 268435456, "threads": 6, "cmdline": "demo-sync --interval 300" },
+      { "pid": 1, "name": "init", "state": "S", "cpu_pct": 0.1, "mem_pct": 0.1, "rss": 18874368, "threads": 1, "cmdline": "/sbin/init" }
+    ],
+    "logs": [
+      { "source": "application", "path": "/var/log/demo/application.log", "size": 1048576, "mod_time": "2026-01-02T12:09:30Z", "matches": { "error": 2, "warn": 4 }, "last_match": "synthetic health check failed" },
+      { "source": "audit", "path": "/var/log/demo/audit.log", "size": 102400, "mod_time": "2026-01-02T12:05:00Z", "matches": {}, "last_match": "" }
+    ],
+    "power": { "package_watts": 18.6, "parts": { "cores": 9.8, "uncore": 3.2, "dram": 4.1 }, "energy_uj": 84928343000 },
+    "gpu": [{ "card": "card0", "freq_mhz": 450, "min_mhz": 300, "max_mhz": 1100, "rp0_mhz": 1100, "rc6_ms": 18400000, "engines": ["render", "video"] }],
+    "bcache": { "present": false, "cache_mode": "", "state": "", "cache_hits": 0, "cache_misses": 0, "bypass_hits": 0, "bypass_misses": 0, "cache_bypass_hits": 0, "cache_bypass_misses": 0, "hit_ratio": 0, "available_percent": 0 },
+    "net_stats": { "tcp_in_use": 28, "tcp_time_wait": 11, "tcp_alloc": 42, "sockets_used": 824, "active_opens": 5500, "passive_opens": 8200, "curr_estab": 17, "in_segs": 15200000, "out_segs": 13100000, "retrans_segs": 310, "in_errs": 1, "out_rsts": 90, "retrans_pct": 0.002, "listen_overflows": 0, "listen_drops": 0, "conntrack_used": 640, "conntrack_max": 262144, "arp_entries": 8, "routes": 12 },
+    "power_supplies": [{ "name": "Sample PSU", "type": "Mains", "status": "OK", "online": "1" }],
+    "kernel": { "version": "6.12.0-synthetic", "cmdline": "ro quiet synthetic_fixture=1", "module_count": 92 },
+    "system": { "ctxt": 942012000, "processes": 280410, "procs_running": 2, "procs_blocked": 0, "failed_units": [], "ntp_synced": true, "timezone": "UTC" },
+    "edac": { "corrected": 0, "uncorrected": 0 },
+    "journal": [],
+    "dmesg": [],
+    "subvolumes": 12,
+    "alerts": [
+      { "id": "temp_hdd_sdc", "severity": "warning", "title": "SATA temperature above warning", "detail": "Sample sensor sdc is 51.4°C; warning threshold is 50°C.", "since": "2026-01-02T12:04:00Z", "active": true },
+      { "id": "container_sync", "severity": "warning", "title": "Container health check failing", "detail": "Synthetic sync-runner is running but unhealthy.", "since": "2026-01-02T12:07:00Z", "active": true }
+    ],
+    "watchdog": { "version": "0.0.0-fixture", "interval_s": 10, "reboot_enabled": false, "actions_enabled": true, "reboot_delay_s": 300, "alert_count": 2 }
+  },
+  "events": [
+    { "ts": "2026-01-02T12:08:30Z", "kind": "fired", "alert": { "id": "container_sync", "severity": "warning", "title": "Container health check failing", "detail": "Synthetic sync-runner is running but unhealthy.", "since": "2026-01-02T12:07:00Z", "active": true } },
+    { "ts": "2026-01-02T12:05:00Z", "kind": "fired", "alert": { "id": "temp_hdd_sdc", "severity": "warning", "title": "SATA temperature above warning", "detail": "Sample sensor sdc crossed its warning threshold.", "since": "2026-01-02T12:04:00Z", "active": true } },
+    { "kind": "resolved", "alert": { "id": "temp_cpu", "severity": "warning", "title": "CPU temperature returned to normal", "detail": "Synthetic historical thermal event without a separate event timestamp.", "since": "2026-01-02T11:45:00Z", "active": false } }
+  ],
+  "history": [
+    { "ts": "2026-01-02T12:01:00Z", "cpu": 18, "mem_pct": 36.8, "load1": 0.8, "net_rx": 18000000, "net_tx": 7000000, "disk_read": 22000000, "disk_write": 8000000, "temps": { "cpu": 52.1, "cpu_core_0": 49.2, "dimm0": 41.4, "nvme0": 44.3, "hdd_sdc": 48.9 }, "fans": { "cpu_fan": { "rpm": 1200, "pwm": 110 }, "intake_fan": { "rpm": 0, "pwm": 0 } }, "used_pct": 59, "corruption": 0, "read_only": false, "mem_available": 19000000000 },
+    { "ts": "2026-01-02T12:02:00Z", "cpu": 24, "mem_pct": 37, "load1": 1.1, "net_rx": 28000000, "net_tx": 9000000, "disk_read": 18000000, "disk_write": 6000000, "temps": { "cpu": 53.4, "cpu_core_0": 50.6, "nvme0": 44.8, "hdd_sdc": 49.1 }, "fans": { "cpu_fan": { "rpm": 1220, "pwm": 110 }, "rear_fan": { "rpm": 980, "pwm": 95 }, "intake_fan": { "rpm": 0, "pwm": 0 } }, "used_pct": 59, "corruption": 0, "read_only": false, "mem_available": 19100000000 },
+    { "ts": "2026-01-02T12:03:00Z", "cpu": 20, "mem_pct": 37.1, "load1": 1, "net_rx": 14000000, "net_tx": 5000000, "disk_read": 14000000, "disk_write": 7000000, "temps": { "cpu": 53, "dimm0": 41.8, "nvme0": 45, "hdd_sdc": 49.4 }, "fans": { "cpu_fan": { "rpm": 1210, "pwm": 110 }, "rear_fan": { "rpm": 990, "pwm": 95 }, "intake_fan": { "rpm": 0, "pwm": 0 } }, "used_pct": 59, "corruption": 0, "read_only": false, "mem_available": 19120000000 },
+    { "ts": "2026-01-02T12:04:00Z", "cpu": 38, "mem_pct": 37.4, "load1": 1.4, "net_rx": 62000000, "net_tx": 16000000, "disk_read": 48000000, "disk_write": 12000000, "temps": { "cpu": 55.8, "cpu_core_0": 52.1, "dimm0": 42.4, "nvme0": 45.3, "nvme0_sensor_1": 47.7, "hdd_sdc": 50.2 }, "fans": { "cpu_fan": { "rpm": 1280, "pwm": 116 }, "rear_fan": { "rpm": 1010, "pwm": 96 }, "intake_fan": { "rpm": 0, "pwm": 0 } }, "used_pct": 59.1, "corruption": 0, "read_only": false, "mem_available": 19080000000 },
+    { "ts": "2026-01-02T12:05:00Z", "cpu": 45, "mem_pct": 37.7, "load1": 1.5, "net_rx": 88000000, "net_tx": 22000000, "disk_read": 61000000, "disk_write": 15000000, "temps": { "cpu": 57, "cpu_core_0": 53.5, "dimm0": 42.9, "nvme0": 45.6, "nvme0_sensor_1": 48.4, "hdd_sdc": 51.4 }, "fans": { "cpu_fan": { "rpm": 1360, "pwm": 122 }, "rear_fan": { "rpm": 1060, "pwm": 100 }, "intake_fan": { "rpm": 0, "pwm": 0 } }, "used_pct": 59.1, "corruption": 0, "read_only": false, "mem_available": 19020000000 },
+    { "ts": "2026-01-02T12:06:00Z", "cpu": 40, "mem_pct": 37.6, "load1": 1.4, "net_rx": 76000000, "net_tx": 20000000, "disk_read": 50000000, "disk_write": 14000000, "temps": { "cpu": 56.6, "cpu_core_0": 53.1, "dimm0": 43, "nvme0": 45.7, "nvme0_sensor_1": 48.8, "hdd_sdc": 51.2 }, "fans": { "cpu_fan": { "rpm": 1340, "pwm": 120 }, "rear_fan": { "rpm": 1050, "pwm": 99 }, "intake_fan": { "rpm": 0, "pwm": 0 } }, "used_pct": 59.1, "corruption": 0, "read_only": false, "mem_available": 19050000000 },
+    { "ts": "2026-01-02T12:07:00Z", "cpu": 29, "mem_pct": 37.3, "load1": 1.3, "net_rx": 55000000, "net_tx": 15000000, "disk_read": 35000000, "disk_write": 10000000, "temps": { "cpu": 55.5, "cpu_core_0": 52.2, "nvme0": 45.8, "nvme0_sensor_1": 49.1, "hdd_sdc": 51.1 }, "fans": { "cpu_fan": { "rpm": 1320, "pwm": 118 }, "rear_fan": { "rpm": 1040, "pwm": 99 }, "intake_fan": { "rpm": 0, "pwm": 0 } }, "used_pct": 59.1, "corruption": 0, "read_only": false, "mem_available": 19100000000 },
+    { "ts": "2026-01-02T12:08:00Z", "cpu": 27, "mem_pct": 37.2, "load1": 1.2, "net_rx": 48000000, "net_tx": 13000000, "disk_read": 30000000, "disk_write": 9000000, "temps": { "cpu": 55.3, "cpu_core_0": 52, "dimm0": 42.8, "nvme0": 45.9, "nvme0_sensor_1": 49.2, "hdd_sdc": 51 }, "fans": { "cpu_fan": { "rpm": 1310, "pwm": 118 }, "rear_fan": { "rpm": 1040, "pwm": 99 }, "intake_fan": { "rpm": 0, "pwm": 0 } }, "used_pct": 59.1, "corruption": 0, "read_only": false, "mem_available": 19130000000 },
+    { "ts": "2026-01-02T12:09:00Z", "cpu": 36, "mem_pct": 37.4, "load1": 1.3, "net_rx": 72000000, "net_tx": 18000000, "disk_read": 42000000, "disk_write": 12000000, "temps": { "cpu": 57.7, "cpu_core_0": 53.8, "dimm0": 43.3, "nvme0": 46, "nvme0_sensor_1": 49.4, "hdd_sdc": 51.2 }, "fans": { "cpu_fan": { "rpm": 1400, "pwm": 125 }, "rear_fan": { "rpm": 1080, "pwm": 101 }, "intake_fan": { "rpm": 0, "pwm": 0 } }, "used_pct": 59.1, "corruption": 0, "read_only": false, "mem_available": 19100000000 },
+    { "ts": "2026-01-02T12:10:00Z", "cpu": 32.7, "mem_pct": 37.5, "load1": 1.26, "net_rx": 83906560, "net_tx": 20992000, "disk_read": 121939968, "disk_write": 40894464, "temps": { "cpu": 58.4, "cpu_core_0": 54.1, "cpu_core_1": 56.7, "cpu_core_2": 49.9, "cpu_core_3": 48.2, "dimm0": 43.6, "board": 39.8, "nvme0": 46.2, "nvme0_sensor_1": 49.7, "nvme1": 44.8, "nvme1_sensor_1": 47.1, "hdd_sda": 37.5, "hdd_sdb": 38.1, "hdd_sdc": 51.4, "zone_x86_pkg": 57.2 }, "fans": { "cpu_fan": { "rpm": 1450, "pwm": 128 }, "rear_fan": { "rpm": 1100, "pwm": 102 }, "intake_fan": { "rpm": 0, "pwm": 0 } }, "used_pct": 59.1, "corruption": 0, "read_only": false, "mem_available": 19327352832 }
+  ]
+}

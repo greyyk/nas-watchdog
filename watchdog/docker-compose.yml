@@ -3,7 +3,7 @@ services:
     build:
       context: .
     # Local source builds are the default. For a published release, set
-    # WATCHDOG_IMAGE=ghcr.io/<owner>/<repository>:<version> in .env.
+    # WATCHDOG_IMAGE=ghcr.io/greyyk/nas-watchdog:<version> in .env.
     image: ${WATCHDOG_IMAGE:-nas-watchdog:local}
     # The supported D6U/D8U release target is Linux/AMD64. D4/D6 ARM builds
     # are not currently supported; see docs/COMPATIBILITY.md.

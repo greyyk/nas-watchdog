@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.grey.naswatchdog.charts.HistoryRange
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,6 +50,8 @@ class TelemetryViewModel(application: Application) : AndroidViewModel(applicatio
     private var foregroundActive = false
     private var statsJob: Job? = null
     private var historyJob: Job? = null
+    private var persistenceJob: Job? = null
+    private var connectionRevision = 0L
     private var visibleHistoryRange = HistoryRange.ONE_HOUR
     private var latestNetworkResponse: StatsResponse? = null
 
@@ -61,6 +64,7 @@ class TelemetryViewModel(application: Application) : AndroidViewModel(applicatio
         }
         config = newConfig
         if (oldConfig?.baseUrl != baseUrl || oldConfig.token != token) {
+            connectionRevision += 1
             statsJob?.cancel()
             historyJob?.cancel()
             latestNetworkResponse = null
@@ -72,6 +76,20 @@ class TelemetryViewModel(application: Application) : AndroidViewModel(applicatio
             restartHistory()
         }
         startForegroundJobs()
+    }
+
+    suspend fun disconnectAndClearLocalData() {
+        foregroundActive = false
+        statsJob?.cancelAndJoin()
+        historyJob?.cancelAndJoin()
+        // A paused-screen save must not recreate a just-cleared connection cache.
+        persistenceJob?.cancelAndJoin()
+        persistenceJob = null
+        connectionRevision += 1
+        config = null
+        latestNetworkResponse = null
+        _state.value = TelemetryUiState()
+        repository.clearLocalCaches()
     }
 
     fun setForegroundActive(active: Boolean) {
@@ -89,7 +107,7 @@ class TelemetryViewModel(application: Application) : AndroidViewModel(applicatio
             val current = config
             val latest = latestNetworkResponse
             if (current != null && latest != null) {
-                viewModelScope.launch {
+                persistenceJob = viewModelScope.launch {
                     repository.persistNow(current.baseUrl, current.token, latest)
                 }
             }
@@ -109,9 +127,10 @@ class TelemetryViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     private fun loadCachedSnapshot(config: ConnectionConfig) {
+        val revision = connectionRevision
         viewModelScope.launch {
             val cached = repository.cachedStats(config.baseUrl, config.token)
-            if (config != this@TelemetryViewModel.config || cached == null) return@launch
+            if (revision != connectionRevision || config != this@TelemetryViewModel.config || cached == null) return@launch
             val hasNetworkSnapshot = _state.value.snapshot?.cached == false
             if (!hasNetworkSnapshot) {
                 _state.update {

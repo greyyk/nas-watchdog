@@ -1,12 +1,15 @@
 package com.grey.naswatchdog.feature
 
+import android.Manifest
 import android.content.Intent
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,12 +19,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -34,6 +39,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.grey.naswatchdog.Stats
@@ -58,16 +65,19 @@ fun SettingsOverviewScreen(
     prefs: android.content.SharedPreferences,
     onSave: (String, String, Long) -> Unit,
     onEditConnection: () -> Unit,
+    onForgetConnection: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var url by remember(currentUrl) { mutableStateOf(currentUrl) }
     var token by remember(currentToken) { mutableStateOf(currentToken) }
     var showUrlError by remember { mutableStateOf(false) }
-    var notifications by remember(prefs) { mutableStateOf(prefs.getBoolean("notifications", true)) }
-    var liveMonitoring by remember(prefs) { mutableStateOf(prefs.getBoolean("live_monitoring", true)) }
+    var notifications by remember(prefs) { mutableStateOf(prefs.getBoolean("notifications", false)) }
+    var liveMonitoring by remember(prefs) { mutableStateOf(prefs.getBoolean("live_monitoring", false)) }
     var interval by remember(prefs) { mutableLongStateOf(prefs.getLong("refresh_ms", 10_000L)) }
+    var forgetRequested by remember { mutableStateOf(false) }
     val ctx = LocalContext.current
     var notificationsAllowed by remember { mutableStateOf(canNotify(ctx)) }
+    var pendingMonitoring by remember { mutableStateOf<String?>(null) }
     var lastBackgroundSuccess by remember(prefs) {
         mutableLongStateOf(prefs.getLong("last_background_success", 0L))
     }
@@ -77,12 +87,32 @@ fun SettingsOverviewScreen(
     val notificationSettings = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         notificationsAllowed = canNotify(ctx)
     }
+    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        notificationsAllowed = canNotify(ctx)
+        val key = pendingMonitoring
+        pendingMonitoring = null
+        if (granted && key != null) {
+            prefs.edit().putBoolean(key, true).apply()
+            syncAlertMonitoring(ctx)
+        }
+    }
+
+    fun setMonitoringPreference(key: String, enabled: Boolean) {
+        if (enabled && Build.VERSION.SDK_INT >= 33 && !notificationsAllowed) {
+            pendingMonitoring = key
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            return
+        }
+        prefs.edit().putBoolean(key, enabled).apply()
+        notificationsAllowed = canNotify(ctx)
+        syncAlertMonitoring(ctx)
+    }
 
     DisposableEffect(prefs) {
         val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             when (key) {
-                "notifications" -> notifications = prefs.getBoolean("notifications", true)
-                "live_monitoring" -> liveMonitoring = prefs.getBoolean("live_monitoring", true)
+                "notifications" -> notifications = prefs.getBoolean("notifications", false)
+                "live_monitoring" -> liveMonitoring = prefs.getBoolean("live_monitoring", false)
                 "last_background_success" -> {
                     lastBackgroundSuccess = prefs.getLong("last_background_success", 0L)
                 }
@@ -170,22 +200,14 @@ fun SettingsOverviewScreen(
                 title = "Alert notifications",
                 detail = "Notify me about new NAS issues",
                 checked = notifications,
-                onCheckedChange = { checked ->
-                    notifications = checked
-                    prefs.edit().putBoolean("notifications", checked).apply()
-                    syncAlertMonitoring(ctx)
-                },
+                onCheckedChange = { setMonitoringPreference("notifications", it) },
             )
             SettingsSwitchRow(
                 title = "Live background alerts",
-                detail = "Reconnects automatically when the app is closed",
+                detail = "User-enabled live stream; reconnects automatically when the app is closed",
                 checked = liveMonitoring,
                 enabled = notifications,
-                onCheckedChange = { checked ->
-                    liveMonitoring = checked
-                    prefs.edit().putBoolean("live_monitoring", checked).apply()
-                    syncAlertMonitoring(ctx)
-                },
+                onCheckedChange = { setMonitoringPreference("live_monitoring", it) },
             )
             Text(
                 if (liveMonitoring && notifications) {
@@ -289,8 +311,26 @@ fun SettingsOverviewScreen(
         item(key = "about", contentType = "settings_about") {
             SettingsReadout(
                 label = "App version",
-                value = com.grey.naswatchdog.BuildConfig.VERSION_NAME,
+                value = "${com.grey.naswatchdog.BuildConfig.VERSION_NAME} (${com.grey.naswatchdog.BuildConfig.VERSION_CODE})",
             )
+            SettingsReadout(
+                label = "Connection type",
+                value = if (com.grey.naswatchdog.isDemoConnection(currentUrl)) "Synthetic demo" else "Your NAS",
+            )
+            Text(
+                "NAS Watchdog is independent software and is not affiliated with, sponsored by, authorized by, or endorsed by Zettlab or another NAS manufacturer.",
+                style = MaterialTheme.typography.bodySmall,
+                color = Dim,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            TextButton(
+                onClick = { com.grey.naswatchdog.openExternalLink(ctx, com.grey.naswatchdog.PRIVACY_POLICY_URL) },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            ) { Text("Privacy policy") }
+            OutlinedButton(
+                onClick = { com.grey.naswatchdog.openExternalLink(ctx, com.grey.naswatchdog.PROJECT_URL) },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            ) { Text("Project, setup, and independence") }
             if (s == null) {
                 Text(
                     "Server details will appear after the next successful connection.",
@@ -309,7 +349,39 @@ fun SettingsOverviewScreen(
                     value = if (s.actionsEnabled) "Enabled" else "Disabled",
                 )
             }
+            SettingsSectionDivider()
         }
+        item(key = "forget", contentType = "settings_actions") {
+            SectionHeading("Local device data")
+            Text(
+                "Clear the saved server address, token, preferences, and locally cached NAS snapshots on this device. This does not erase your NAS, its storage pool, or watchdog server state.",
+                style = MaterialTheme.typography.bodySmall,
+                color = Dim,
+            )
+            OutlinedButton(
+                onClick = { forgetRequested = true },
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 48.dp),
+            ) { Text("Disconnect & clear local data", color = com.grey.naswatchdog.ui.Red) }
+        }
+    }
+
+    if (forgetRequested) {
+        AlertDialog(
+            onDismissRequest = { forgetRequested = false },
+            title = { Text("Disconnect this device?") },
+            text = {
+                Text("This clears local connection credentials, settings, and cached telemetry. Changes on your NAS are not performed. You will need to reconnect after this.")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    forgetRequested = false
+                    onForgetConnection()
+                }) { Text("Clear local data", color = com.grey.naswatchdog.ui.Red) }
+            },
+            dismissButton = {
+                TextButton(onClick = { forgetRequested = false }) { Text("Keep connection") }
+            },
+        )
     }
 }
 
@@ -330,7 +402,12 @@ private fun SettingsSwitchRow(
             Text(title, style = MaterialTheme.typography.titleSmall, color = TextMain)
             Text(detail, style = MaterialTheme.typography.bodySmall, color = Dim)
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            enabled = enabled,
+            modifier = Modifier.semantics { contentDescription = title },
+        )
     }
 }
 

@@ -2,7 +2,7 @@
 
 ## Support matrix
 
-| ZettLabs model | Platform | Current status | Help needed |
+| Zettlab model | Platform | Current status | Help needed |
 |---|---|---|---|
 | **D6 Ultra (D6U)** | Intel Core Ultra 5 125H, `linux/amd64` | Tested on a live six-bay/two-M.2 ZettOS host; actual populated devices vary | Regression reports and varied drive/fan configurations |
 | **D8 Ultra (D8U)** | Intel Core Ultra 5 125H, `linux/amd64` | Same CPU/target with eight SATA bays and two M.2 slots; not yet validated on physical D8U hardware | Confirm sensors, all populated slots, SMART, fans, pool path, and Docker inventory |
@@ -96,7 +96,7 @@ The script only reads kernel, block-device, hwmon, thermal-zone, and basic versi
 
 Include in the issue:
 
-1. Exact ZettLabs model and ZettOS (or other Linux distro) version
+1. Exact Zettlab model and ZettOS (or other Linux distro) version
 2. Number of populated SATA/NVMe slots (not drive serial numbers)
 3. Expected sensor/device versus what the dashboard shows
 4. The reviewed hardware report
