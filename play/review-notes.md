@@ -34,7 +34,7 @@ Record the device screen continuously (no staged screenshots or cuts over missin
 7. Re-open the app and return to Settings. Disable **Live background alerts**, return to Home/shade, and show that the background monitor has stopped.
 8. Optionally show the active issue in Overview/Thermal before disabling; say in the video caption that it is synthetic.
 
-Use `play/review/foreground-monitoring.mp4` if produced from the exact v1.5.0 app build, otherwise rerecord after changing the final code. Its redacted demo data has no real server address/token. **Upload the video to your own video hosting (for example an unlisted YouTube link), then paste that HTTPS URL into Play Console.** A repository-local video is not itself a video-link field accepted by every Console form.
+Use `play/review/foreground-monitoring.mp4` as the recorded synthetic foreground-service demonstration. Confirm it still matches the exact release you upload; rerecord after changing foreground-service or monitoring-control behavior. Its redacted demo data has no real server address/token. **Upload the video to your own video hosting (for example an unlisted YouTube link), then paste that HTTPS URL into Play Console.** A repository-local video is not itself a video-link field accepted by every Console form.
 
 ## Review limitations that must stay honest
 

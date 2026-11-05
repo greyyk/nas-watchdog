@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.grey.naswatchdog.charts.HistoryRange
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -77,13 +79,16 @@ private class TelemetryCache(context: Context) {
 
 internal class TelemetryRepository(context: Context) {
     private val cache = TelemetryCache(context.applicationContext)
+    private val cacheWrites = Mutex()
     private var lastWriteAt = 0L
 
     suspend fun fetchStats(baseUrl: String, token: String, now: Long = System.currentTimeMillis()): StatsResponse =
         fetchStatsResponse(baseUrl, token).also { response ->
-            if (now - lastWriteAt >= 45_000L) {
-                cache.write(baseUrl, token, response, now)
-                lastWriteAt = now
+            cacheWrites.withLock {
+                if (now - lastWriteAt >= 45_000L) {
+                    cache.write(baseUrl, token, response, now)
+                    lastWriteAt = now
+                }
             }
         }
 
@@ -93,12 +98,14 @@ internal class TelemetryRepository(context: Context) {
     suspend fun cachedStats(baseUrl: String, token: String): CachedStats? = cache.read(baseUrl, token)
 
     suspend fun persistNow(baseUrl: String, token: String, response: StatsResponse, now: Long = System.currentTimeMillis()) {
-        cache.write(baseUrl, token, response, now)
-        lastWriteAt = now
+        cacheWrites.withLock {
+            cache.write(baseUrl, token, response, now)
+            lastWriteAt = now
+        }
     }
 
     /** Removes all locally cached NAS snapshots, not data on the NAS. */
-    suspend fun clearLocalCaches() {
+    suspend fun clearLocalCaches() = cacheWrites.withLock {
         cache.clear()
         lastWriteAt = 0L
     }

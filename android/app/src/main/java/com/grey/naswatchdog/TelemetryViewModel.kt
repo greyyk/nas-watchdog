@@ -50,12 +50,14 @@ class TelemetryViewModel(application: Application) : AndroidViewModel(applicatio
     private var foregroundActive = false
     private var statsJob: Job? = null
     private var historyJob: Job? = null
-    private var persistenceJob: Job? = null
+    private val persistenceJobs = mutableSetOf<Job>()
     private var connectionRevision = 0L
+    private var clearingLocalData = false
     private var visibleHistoryRange = HistoryRange.ONE_HOUR
     private var latestNetworkResponse: StatsResponse? = null
 
     fun configure(baseUrl: String, token: String, refreshMs: Long) {
+        if (clearingLocalData) return
         val newConfig = ConnectionConfig(baseUrl, token, refreshMs.coerceAtLeast(5_000L))
         val oldConfig = config
         if (newConfig == oldConfig) {
@@ -79,21 +81,28 @@ class TelemetryViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     suspend fun disconnectAndClearLocalData() {
-        foregroundActive = false
-        statsJob?.cancelAndJoin()
-        historyJob?.cancelAndJoin()
-        // A paused-screen save must not recreate a just-cleared connection cache.
-        persistenceJob?.cancelAndJoin()
-        persistenceJob = null
-        connectionRevision += 1
-        config = null
-        latestNetworkResponse = null
-        _state.value = TelemetryUiState()
-        repository.clearLocalCaches()
+        if (clearingLocalData) return
+        clearingLocalData = true
+        try {
+            // Invalidate reads and prevent lifecycle re-entry from starting fresh
+            // jobs while an old request or write is being cancelled and joined.
+            foregroundActive = false
+            connectionRevision += 1
+            config = null
+            latestNetworkResponse = null
+            _state.value = TelemetryUiState()
+            statsJob?.cancelAndJoin()
+            historyJob?.cancelAndJoin()
+            persistenceJobs.toList().forEach { it.cancelAndJoin() }
+            persistenceJobs.clear()
+            repository.clearLocalCaches()
+        } finally {
+            clearingLocalData = false
+        }
     }
 
     fun setForegroundActive(active: Boolean) {
-        if (foregroundActive == active) return
+        if (clearingLocalData || foregroundActive == active) return
         foregroundActive = active
         if (active) {
             // Verify the retained snapshot before presenting live actions after a pause.
@@ -107,7 +116,8 @@ class TelemetryViewModel(application: Application) : AndroidViewModel(applicatio
             val current = config
             val latest = latestNetworkResponse
             if (current != null && latest != null) {
-                persistenceJob = viewModelScope.launch {
+                persistenceJobs.retainAll(Job::isActive)
+                persistenceJobs += viewModelScope.launch {
                     repository.persistNow(current.baseUrl, current.token, latest)
                 }
             }

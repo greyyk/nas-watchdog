@@ -16,7 +16,7 @@ android {
         targetSdk = 36
         // Release CI supplies monotonically increasing code and tag-derived name.
         versionCode = providers.gradleProperty("releaseVersionCode").orNull?.toIntOrNull() ?: 5
-        versionName = providers.gradleProperty("releaseVersionName").orNull ?: "1.5.0"
+        versionName = providers.gradleProperty("releaseVersionName").orNull ?: "1.5.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

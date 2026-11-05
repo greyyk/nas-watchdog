@@ -99,6 +99,11 @@ class MonitoringInstrumentationTest {
         }
         assertTrue(model.state.value.snapshot?.cached == false)
         model.setForegroundActive(false)
+        // Repeated lifecycle transitions must not orphan an earlier save.
+        model.setForegroundActive(true)
+        model.setForegroundActive(false)
+        model.setForegroundActive(true)
+        model.setForegroundActive(false)
         runBlocking { model.disconnectAndClearLocalData() }
         assertFalse(File(target.noBackupFilesDir, "telemetry-cache-v1").exists())
 

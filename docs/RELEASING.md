@@ -66,8 +66,8 @@ From a clean reviewed checkout:
 ```sh
 git switch main
 git pull --ff-only
-git tag -a v1.5.0 -m "NAS Watchdog v1.5.0"
-git push origin main v1.5.0
+git tag -a v1.5.1 -m "NAS Watchdog v1.5.1"
+git push origin main v1.5.1
 ```
 
 Open **Actions → Release**. The jobs are:
@@ -87,10 +87,10 @@ Download the APK, AAB, and `SHA256SUMS.txt` into one directory. On macOS:
 
 ```sh
 shasum -a 256 -c SHA256SUMS.txt
-adb install -r nas-watchdog-1.5.0-android.apk
+adb install -r nas-watchdog-1.5.1-android.apk
 ```
 
-On Linux use `sha256sum -c SHA256SUMS.txt`. For the AAB, use `jarsigner -verify nas-watchdog-1.5.0-play.aab`; **do not use apksigner on an AAB**. Inspect the bundle in Play App Bundle Explorer after upload and compare its public certificates with the existing persistent release certificate.
+On Linux use `sha256sum -c SHA256SUMS.txt`. For the AAB, use `jarsigner -verify nas-watchdog-1.5.1-play.aab`; **do not use apksigner on an AAB**. Inspect the bundle in Play App Bundle Explorer after upload and compare its public certificates with the existing persistent release certificate.
 
 A debug APK signed by another local certificate cannot be updated directly by a production APK. Back up/re-enter connection settings and uninstall the old debug package if Android requires it. Do not uninstall production users' apps as a routine migration strategy. Installing the GitHub APK and Play edition works in place only when the application ID and effective **app signing certificate** are the same and the update version code is higher.
 
@@ -106,7 +106,7 @@ openssl rand -hex 32
 Set that random output in `WD_API_TOKEN`, check `POOL_HOST_PATH` against `findmnt -t btrfs`, and pin the published image:
 
 ```dotenv
-WATCHDOG_IMAGE=ghcr.io/greyyk/nas-watchdog:1.5.0
+WATCHDOG_IMAGE=ghcr.io/greyyk/nas-watchdog:1.5.1
 ```
 
 ```sh

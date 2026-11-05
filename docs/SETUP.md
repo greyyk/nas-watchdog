@@ -145,7 +145,7 @@ The first build downloads the Go/Alpine build images and installs runtime tools 
 After the repository has a published release image, you can avoid compiling Go on the NAS. Keep the normal token/pool settings and add this to `.env`, replacing all placeholders:
 
 ```dotenv
-WATCHDOG_IMAGE=ghcr.io/greyyk/nas-watchdog:1.5.0
+WATCHDOG_IMAGE=ghcr.io/greyyk/nas-watchdog:1.5.1
 ```
 
 Then pull and start that exact version:
@@ -197,7 +197,7 @@ Use **Settings → Disconnect & clear local data** to remove the demo, connectio
 
 Once the repository’s release pipeline has published a version, download `nas-watchdog-<version>-android.apk` and `SHA256SUMS.txt` from that version’s GitHub Release. The `*-play.aab` asset is for Play Console upload and **cannot be installed with `adb`**; phone users should choose the APK or a published Play listing.
 
-During initial Play App Signing setup, preserve the existing classical app-signing certificate to allow in-place upgrades between the GitHub APK and Play-delivered builds on Android 16 and below. Follow [Signing strategy](PLAY_STORE.md#signing-strategy--decide-on-the-first-upload); a different signing identity can require uninstalling/reinstalling and losing local settings.
+Future GitHub APKs retain the existing direct-install signer. The current Play export uses different Google-generated app-signing certificates, so in-place GitHub ↔ Play upgrades are **not** promised under that configuration. See [certificate roles and fingerprints](../play/certificates.md) and the controlled [signing strategy](PLAY_STORE.md#signing-strategy--decide-on-the-first-upload). A different classical deployment signer can require uninstalling/reinstalling on Android 16 and lower, which clears app-local settings.
 
 Verify from a workstation before installing. On macOS:
 

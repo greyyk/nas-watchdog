@@ -1,6 +1,6 @@
 # Google Play publication guide
 
-NAS Watchdog's GitHub APK and Google Play distribution use the same application ID and source. v1.5.0 targets **Android 16 (API 36)**, remains compatible with Android 8.0 (API 26), and publishes both a signed GitHub APK and a signed Play-compatible AAB. Unlike the direct APK, the AAB uses a distinct upload-only key, consistent with Play App Signing's recommended separation.
+NAS Watchdog's GitHub APK and Google Play distribution use the same application ID and source. v1.5.1 targets **Android 16 (API 36)**, remains compatible with Android 8.0 (API 26), and publishes both a signed GitHub APK and a signed Play-compatible AAB. Unlike the direct APK, the AAB uses a distinct upload-only key, consistent with Play App Signing's recommended separation.
 
 This is a maintainer checklist, not a promise that Google will approve an app or a substitute for legal/policy advice. Play requirements can change; read the linked current policies and every declaration in Console.
 
@@ -14,18 +14,26 @@ Copy [store-listing.md](../play/store-listing.md) into Console. Replace only the
 
 ## Signing strategy — decide on the first upload
 
-The GitHub release's existing PKCS12 key signs the direct-install APK. A separate persistent Play upload key signs the AAB from independent secrets. Unlike the uploaded AAB, the final Play-delivered APK is signed with Play's configured **app signing key**. Google's current Console flow automatically enrolls newly created apps in its generated hybrid signing—so the existing key preservation option below must be handled deliberately before open/production rollout.
+The GitHub release's existing PKCS12 key signs the direct-install APK. A separate persistent Play upload key signs the AAB from independent secrets. Unlike the uploaded AAB, the final Play-delivered APK is signed with Play's configured **app signing key**. Google's current Console flow automatically enrolls newly created apps in its generated quantum-ready hybrid signing.
 
-For a **new** Play listing:
+The owner-supplied Console export confirms that the listing currently has **three Google-generated app-signing identities**:
 
-1. Choose **Play App Signing** (recommended).
-2. To preserve upgrade compatibility with already distributed GitHub v1.4.0/v1.5.0 APKs, choose the Console option to use your **existing app signing key**, export/upload the **existing** release private key using Play's official instructions, and **verify the app-signing SHA-256 certificate matches the GitHub APK** before rollout.
-3. The AAB from the GitHub Release is signed by the separate upload identity. Its public [upload certificate](../play/certificates.md) proves upload identity; it is **not** the final delivered certificate. Google's currently documented entry point is **Protected with Play → Play Store protection → Manage Play app signing → Change key**.
-4. If you select a Play-generated distribution key instead, GitHub-APK users on Android 16 and below cannot be upgraded in place by a differently classical-signed Play build. Do not choose between those approaches accidentally or change identities after rollout. A hybrid/quantum-ready upgrade can use additional certificates on Android 17+, so follow the official key ceremony and App integrity display exactly.
-5. Save both the public **classical App signing key certificate** and **Upload key certificate** fingerprints from **App integrity**. Match them to [play/certificates.md](../play/certificates.md); the classical app-signing certificate is the one shared with the existing GitHub APK for Android 16-and-lower upgrades. Do not compare only the upload key.
-6. The distinct upload key is already configured. If later using a separate/reset upload certificate, update the four `ANDROID_PLAY_*` secrets and the public certificate documentation in the same deliberate release. Never discard the app-signing key until Play confirms the effective distribution identity.
+- `deployment_cert`: classical deployment on Android 16 and lower, SHA-256 beginning `3B:0A:59:C2`;
+- `hybrid_classical_cert`: the classical component on Android 17 and higher, beginning `8D:FA:C5:39`;
+- `hybrid_pqc_cert`: the post-quantum component on Android 17 and higher, beginning `5A:93:5F:29`.
 
-The private key remains at the operator's private backup location and in encrypted GitHub Actions secrets. It is never included in the source tree, Release assets, logs, Play text, or support responses. See [RELEASING.md](RELEASING.md) for backup and release mechanics.
+None matches the GitHub APK signer's `C2:A2:05:40…C3:62:FC`. Full verified SHA-256/SHA-1 fingerprints and roles are recorded in [play/certificates.md](../play/certificates.md). With the current Play keys, **in-place GitHub ↔ Play upgrades are not promised**. Future GitHub APK releases still preserve the existing direct-install signing identity.
+
+Before the first open-testing or production rollout, deliberately choose:
+
+1. **Keep the current Google-generated identity.** Use Play's normal quantum-ready configuration and make no cross-channel in-place upgrade claim. A different classical deployment signer can require uninstall/reinstall on Android 16 and lower, removing app-local settings.
+2. **Preserve the existing GitHub deployment identity.** While Console still offers **Protected with Play → Play Store protection → Manage Play app signing → Change key** before open/production rollout, provide a copy of the existing release private key only through Google's official key-transfer instructions. Verify the resulting classical **app-signing/deployment** certificate—not merely the upload certificate—matches the GitHub APK. Android 17 and higher can still use separate hybrid classical/PQC identities, so repeat the certificate/export check and do not promise one certificate for every Android version.
+
+The AAB from the GitHub Release is signed by the separate upload identity `3F:1A:9C:89…F4:1F:03`; that signature authenticates the upload but is not the final delivered app signature. The four `ANDROID_PLAY_*` secrets already configure this upload key. If it is deliberately reset later, update those secrets and the public upload-certificate documentation together. Do not discard or replace private keys based on fingerprints alone, and do not assume a key-change option remains available after rollout.
+
+Use **Internal app sharing** or **Internal testing** to install the actual Play-processed APK and inspect its signer before broader rollout. If App Links or fingerprint-authenticated APIs are later enabled, register all required app-signing identities, including both hybrid certificates on Android 17 and higher; do not deploy `assetlinks.json` without an owner-controlled HTTPS origin and tested intent filters.
+
+Private keys remain at the operator's private backup location and in encrypted GitHub Actions secrets. They are never included in the source tree, Release assets, logs, Play text, or support responses. See [RELEASING.md](RELEASING.md) for backup and release mechanics.
 
 ## What is already automated
 

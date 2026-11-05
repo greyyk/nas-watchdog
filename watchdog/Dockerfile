@@ -1,5 +1,5 @@
 FROM golang:1.27-alpine3.23 AS build
-ARG VERSION=1.5.0
+ARG VERSION=1.5.1
 WORKDIR /src
 COPY go.mod ./
 COPY *.go ./
@@ -7,7 +7,7 @@ COPY ui ./ui
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /out/watchdog .
 
 FROM alpine:3.23
-ARG VERSION=1.5.0
+ARG VERSION=1.5.1
 LABEL org.opencontainers.image.title="NAS Watchdog" \
       org.opencontainers.image.description="Independent NAS host telemetry, thermal monitoring, alerts, web dashboard, and Android client" \
       org.opencontainers.image.licenses="MIT" \

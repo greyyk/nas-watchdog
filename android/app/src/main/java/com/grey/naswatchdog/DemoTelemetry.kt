@@ -122,7 +122,7 @@ private fun demoRoot(): JSONObject {
         .put("power", JSONObject().put("package_watts", if (overheat) 88.0 else 29.4))
         .put("logs", JSONArray().put(JSONObject().put("id", "demo").put("path", "/synthetic/demo.log").put("hits", 4)))
         .put("watchdog", JSONObject().put("actions_enabled", false).put("reboot_enabled", false))
-        .put("version", "1.5.0 · synthetic demo")
+        .put("version", "1.5.1 · synthetic demo")
         .put("alerts", demoAlerts())
     return root
 }

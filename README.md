@@ -178,7 +178,7 @@ ghcr.io/greyyk/nas-watchdog:<version>
 ghcr.io/greyyk/nas-watchdog:latest
 ```
 
-To use a pinned release instead of a local build, set `WATCHDOG_IMAGE=ghcr.io/greyyk/nas-watchdog:1.5.0` in `watchdog/.env`, then run `sudo docker compose pull` and `sudo docker compose up -d --no-build`. See [Release installation](docs/RELEASING.md#5-use-the-ghcr-image-on-zettos) for verification, upgrades, and package visibility.
+To use a pinned release instead of a local build, set `WATCHDOG_IMAGE=ghcr.io/greyyk/nas-watchdog:1.5.1` in `watchdog/.env`, then run `sudo docker compose pull` and `sudo docker compose up -d --no-build`. See [Release installation](docs/RELEASING.md#5-use-the-ghcr-image-on-zettos) for verification, upgrades, and package visibility.
 
 ## Documentation
 
