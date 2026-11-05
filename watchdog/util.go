@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -24,6 +25,20 @@ func readTrim(path string) string {
 func readInt64(path string) int64 {
 	n, _ := readInt64OK(path)
 	return n
+}
+
+// clampInt converts a kernel-reported counter to int without wrapping.
+// Sysfs and /proc values fit easily, but a corrupt or hostile value must not
+// turn into a negative reading.
+func clampInt(v int64) int {
+	switch {
+	case v < 0:
+		return 0
+	case v > math.MaxInt:
+		return math.MaxInt
+	default:
+		return int(v)
+	}
 }
 
 func readInt64OK(path string) (int64, bool) {
