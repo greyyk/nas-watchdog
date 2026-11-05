@@ -79,7 +79,7 @@ Open **Actions → Release**. The jobs are:
 
 The first publication of a GHCR package may need its visibility changed to **public** in package settings. The public `greyyk/nas-watchdog` package should be linked to this repository through its source label. Use `packages: write` on only the publishing job; use no long-lived registry PAT in source.
 
-The repository was formerly named `greyyk/zettlabs-nas-watchdog`. GitHub repository links redirect, but GHCR repositories do not become a universal redirect system. New deployments must use **ghcr.io/greyyk/nas-watchdog**. Retain `ghcr.io/greyyk/zettlabs-nas-watchdog:1.4.0` as an explicitly pinned old image only when still needed; upgrade deliberately.
+The repository was formerly named `greyyk/zettlabs-nas-watchdog`. GitHub repository links redirect, but GHCR repositories do not become a universal redirect system. Deployments must use **ghcr.io/greyyk/nas-watchdog**. The legacy `ghcr.io/greyyk/zettlabs-nas-watchdog` package and its old `1.4.0`/`latest` tags were removed on November 5, 2026. Historical source and release assets remain in Git history and GitHub Releases.
 
 ## 4. Verify a Release locally
 
