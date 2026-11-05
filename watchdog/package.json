@@ -11,7 +11,7 @@
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.11",
     "daisyui": "^5.0.43",
-    "tailwindcss": "^4.1.11"
+    "tailwindcss": "^4.3.4"
   },
   "dependencies": {
     "uplot": "^1.6.32"
