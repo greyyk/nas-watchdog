@@ -41,6 +41,14 @@ func clampInt(v int64) int {
 	}
 }
 
+// clampUintToInt converts an unsigned kernel counter to int without wrapping.
+func clampUintToInt(v uint64) int {
+	if v > uint64(math.MaxInt) {
+		return math.MaxInt
+	}
+	return int(v)
+}
+
 func readInt64OK(path string) (int64, bool) {
 	text := readTrim(path)
 	if text == "" {
