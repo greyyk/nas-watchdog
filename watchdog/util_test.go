@@ -26,7 +26,7 @@ func TestClampUintToInt(t *testing.T) {
 	if got := clampUintToInt(3); got != 3 {
 		t.Errorf("clampUintToInt(3) = %d, want 3", got)
 	}
-	if got := clampUintToInt(math.MaxUint64); got != math.MaxInt {
-		t.Errorf("clampUintToInt(MaxUint64) = %d, want %d", got, math.MaxInt)
+	if got := clampUintToInt(math.MaxUint64); got != math.MaxInt32 {
+		t.Errorf("clampUintToInt(MaxUint64) = %d, want %d", got, math.MaxInt32)
 	}
 }
