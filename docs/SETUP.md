@@ -138,6 +138,25 @@ sudo docker compose logs --tail=100 watchdog
 
 The first build downloads the Go/Alpine build images and installs runtime tools in the image. ZettOS needs **no additional Go, Node, smartmontools, or btrfs host packages** for this project. Building natively on the D6U/D8U avoids AMD64 emulation on a workstation.
 
+### Use a published GHCR container instead
+
+After the repository has a published release image, you can avoid compiling Go on the NAS. Keep the normal token/pool settings and add this to `.env`, replacing all placeholders:
+
+```dotenv
+WATCHDOG_IMAGE=ghcr.io/<owner>/<repository>:1.4.0
+```
+
+Then pull and start that exact version:
+
+```sh
+sudo docker compose pull
+sudo docker compose up -d --no-build
+```
+
+The image is `ghcr.io/<owner>/<repository>:<version>`. A corresponding `:latest` tag is also published, but pinning an exact version keeps updates deliberate. If later switching back to a local build, comment out `WATCHDOG_IMAGE` and run `sudo docker compose up -d --build`.
+
+Public GHCR packages need no registry token. The maintainer’s [release guide](RELEASING.md#5-use-the-ghcr-image-on-zettos) covers package visibility and first-time publication.
+
 `docker compose ps` should eventually show **healthy**. Refresh statistics after the first full collection. Initial scans can be slower on systems with many drives or devices that do not respond promptly to SMART queries.
 
 ### Verify the important paths
@@ -166,7 +185,33 @@ The dashboard is HTTP by design for direct LAN/VPN use. Do not port-forward it t
 
 ## 6. Install the Android app
 
-The release tree contains source, not a signed app-store package. Build the debug APK on a workstation.
+### Install a signed release APK
+
+Once the repository’s release pipeline has published a version, download `nas-watchdog-<version>-android.apk` and `SHA256SUMS.txt` from that version’s GitHub Release.
+
+Verify from a workstation before installing. On macOS:
+
+```sh
+shasum -a 256 -c SHA256SUMS.txt
+```
+
+On Linux:
+
+```sh
+sha256sum -c SHA256SUMS.txt
+```
+
+Install by copying the APK to Android or using ADB:
+
+```sh
+adb install -r nas-watchdog-<version>-android.apk
+```
+
+Use only APKs from the repository’s Releases page, built by its Release workflow. Keep future updates tied to the same signing key. If switching from a locally signed debug build, Android may require uninstalling that build first; its local settings will be cleared.
+
+### Build from source
+
+For development or a custom build, compile the debug APK on a workstation.
 
 ### Requirements
 

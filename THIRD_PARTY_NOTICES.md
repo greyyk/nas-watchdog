@@ -1,6 +1,6 @@
 # Third-party notices
 
-NAS Watchdog includes or builds upon the following third-party software. These notices concern the bundled assets, not endorsement by their authors.
+NAS Watchdog’s project code is distributed under [MIT](LICENSE). It includes or builds upon the following third-party software. These notices concern the bundled assets, not endorsement by their authors.
 
 ## uPlot
 

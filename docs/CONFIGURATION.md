@@ -17,6 +17,7 @@ Durations use Go syntax such as `30s`, `10m`, or `1h`. Temperatures are degrees 
 | `POOL_HOST_PATH` | `/zettos/pool/1` | Actual btrfs pool mountpoint on the host. Compose mounts it at `/pool` and sets the matching collector value |
 | `WATCHDOG_BIND_ADDRESS` | `0.0.0.0` | Host address on which Docker publishes the service |
 | `WATCHDOG_PORT` | `8090` | Host port mapped to container port 8080 |
+| `WATCHDOG_IMAGE` | unset → `nas-watchdog:local` | Optional published image URI such as `ghcr.io/<owner>/<repository>:1.4.0`; use `compose pull` then `up -d --no-build` |
 
 `WATCHDOG_BIND_ADDRESS=127.0.0.1` is suitable only when a secure local tunnel/reverse proxy supplies remote access. Android clients on other devices cannot use their own loopback address to reach the NAS.
 

@@ -8,6 +8,7 @@ Purpose-built for ZettLabs D6 Ultra and D8 Ultra hardware. It catches what ordin
 [![D8U validation wanted](https://img.shields.io/badge/D8U-validation%20wanted-e9b949)](#model-support)
 [![Docker · Linux AMD64](https://img.shields.io/badge/Docker-Linux%2FAMD64-2496ED)](#quick-start)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84)](#android-app)
+[![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 > **Built for ZettLabs. Tuned for ZettOS.** D6 Ultra (D6U) has been live-tested on ZettOS; D8 Ultra (D8U) needs owner validation. **D4 and D6 ARM models are not supported yet.** Running another OS on your D6U/D8U? The Docker service can also be adapted to other **AMD64 Linux** installations; see the [non-ZettOS guide](docs/OTHER_LINUX.md). Hardware reports and well-tested contributions are welcome.
 
@@ -117,6 +118,8 @@ Missing capabilities remain visible as **not reported**, not as zero-valued hard
 
 The Android client includes live telemetry, last-good offline snapshots, CPU and thermal instruments, storage/SMART details, Docker controls and logs, network information, alert history, and guarded actions.
 
+Tagged releases can publish a **signed release APK with SHA-256 checksums** through the automated [Release workflow](.github/workflows/release.yml). Maintainers configure one persistent signing identity as described in the [release guide](docs/RELEASING.md).
+
 ### Build
 
 On a workstation with **JDK 17** and the Android SDK:
@@ -162,6 +165,17 @@ Use a long random token, keep `.env` private, patch and review updates, and keep
 - The event buffer holds the latest 200 events; alert state and selected reboot/counter state persist in the Docker volume.
 - After an update, use the same project directory so Compose retains the `watchdog-data` volume.
 
+### Published containers
+
+The release workflow publishes Linux AMD64 images to **GitHub Container Registry**:
+
+```text
+ghcr.io/<owner>/<repository>:<version>
+ghcr.io/<owner>/<repository>:latest
+```
+
+To use a pinned release instead of a local build, set `WATCHDOG_IMAGE=ghcr.io/<owner>/<repository>:<version>` in `watchdog/.env`, then run `sudo docker compose pull` and `sudo docker compose up -d --no-build`. See [Release installation](docs/RELEASING.md#5-use-the-ghcr-image-on-zettos) for verification, upgrades, and package visibility.
+
 ## Documentation
 
 - **[ZettOS setup, Android installation, updates, and troubleshooting](docs/SETUP.md)**
@@ -169,6 +183,7 @@ Use a long random token, keep `.env` private, patch and review updates, and keep
 - **[Compatibility and hardware discovery](docs/COMPATIBILITY.md)**
 - **[Configuration reference](docs/CONFIGURATION.md)**
 - **[HTTP API](docs/API.md)**
+- **[Publishing signed APKs and GHCR containers](docs/RELEASING.md)**
 - **[Contributing](CONTRIBUTING.md)**
 
 ## Development and verification
@@ -212,4 +227,6 @@ D8U validation, missing-sensor reports, Android UI testing, and documentation fi
 
 Use a small, redacted **[hardware report](docs/COMPATIBILITY.md#reporting-a-hardware-difference)** when opening a compatibility issue. Never upload `.env`, API tokens, ntfy topics/tokens, serial numbers, private IP addresses, raw logs, or a complete `/stats` response.
 
-Third-party asset notices are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+## License
+
+NAS Watchdog is available under the **[MIT License](LICENSE)**. Bundled third-party assets retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

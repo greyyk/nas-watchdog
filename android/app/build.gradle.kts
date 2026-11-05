@@ -1,3 +1,5 @@
+import java.io.File
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -12,13 +14,38 @@ android {
         applicationId = "com.grey.naswatchdog"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.3"
+        // Release CI supplies monotonically increasing code and tag-derived name.
+        versionCode = providers.gradleProperty("releaseVersionCode").orNull?.toIntOrNull() ?: 4
+        versionName = providers.gradleProperty("releaseVersionName").orNull ?: "1.3"
+    }
+
+    // Local release builds remain unsigned unless the release CI environment is
+    // present. Keystore material is never passed as Gradle text or committed.
+    val releaseStoreFile = System.getenv("ANDROID_KEYSTORE_FILE")
+        ?.takeIf(String::isNotBlank)
+        ?.let(::File)
+    if (releaseStoreFile != null) {
+        require(releaseStoreFile.isFile) { "Android release keystore was not found at $releaseStoreFile" }
+        signingConfigs.create("release") {
+            storeFile = releaseStoreFile
+            storePassword = requireNotNull(System.getenv("ANDROID_KEYSTORE_PASSWORD")) {
+                "Set ANDROID_KEYSTORE_PASSWORD for release signing"
+            }
+            keyAlias = requireNotNull(System.getenv("ANDROID_KEY_ALIAS")) {
+                "Set ANDROID_KEY_ALIAS for release signing"
+            }
+            keyPassword = requireNotNull(System.getenv("ANDROID_KEY_PASSWORD")) {
+                "Set ANDROID_KEY_PASSWORD for release signing"
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            if (releaseStoreFile != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
