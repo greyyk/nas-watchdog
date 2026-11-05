@@ -7,7 +7,7 @@ A stable tag publishes the open-source distribution artifacts. It does **not** u
 | Signed direct-install APK | GitHub Release: `nas-watchdog-<version>-android.apk` |
 | Signed Android App Bundle for Play | GitHub Release: `nas-watchdog-<version>-play.aab` |
 | SHA-256 checksums for both | Same GitHub Release: `SHA256SUMS.txt` |
-| Linux AMD64 watchdog | `ghcr.io/greyyk/nas-watchdog:<version>` and `:latest` |
+| Linux x86-64 (`linux/amd64`) watchdog | `ghcr.io/greyyk/nas-watchdog:<version>` and `:latest` |
 
 The workflow accepts only `vMAJOR.MINOR.PATCH` tags, runs tests/lint, embeds tag-derived version metadata, verifies APK and AAB signing, builds/tests/pushes the image, and creates the Release only after all paths succeed.
 
@@ -49,7 +49,7 @@ Use a strong store/key password, keep an encrypted offline backup, then add your
 
 ## 2. Prepare and test
 
-1. Finish review on `main`; keep normal CI green.
+1. Finish review on `main`; keep normal CI green. The `main protection` ruleset requires a pull request with the four CI jobs passing, so complete changes through a PR (repository admins may bypass when necessary).
 2. Test Go, Android, web navigation/actions, API authorization, and the versioned container together.
 3. Keep actions and automatic reboot off by default. Check inventory-driven hardware behavior and D6U/D8U compatibility claims.
 4. Review third-party branding and original imagery in [TRADEMARKS.md](../TRADEMARKS.md).
