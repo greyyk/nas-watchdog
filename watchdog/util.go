@@ -41,6 +41,17 @@ func clampInt(v int64) int {
 	}
 }
 
+// clampUintToInt converts an unsigned kernel counter to int without wrapping.
+// Process counters never approach MaxInt32 on any supported platform, so an
+// explicit bound keeps the conversion unambiguous for static analysis.
+func clampUintToInt(v uint64) int {
+	const max = 1<<31 - 1
+	if v > max {
+		return max
+	}
+	return int(v)
+}
+
 func readInt64OK(path string) (int64, bool) {
 	text := readTrim(path)
 	if text == "" {

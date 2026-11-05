@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -170,12 +171,17 @@ func (c *Collector) cpuTopologyByCore() map[int]cpuThermalTopology {
 		if !ok {
 			continue
 		}
-		top := out[int(coreID)]
+		if coreID < 0 || coreID > math.MaxInt32 {
+			// A corrupt core_id would produce an unusable thermal key.
+			continue
+		}
+		id := int(coreID)
+		top := out[id]
 		top.CPUs = append(top.CPUs, logical)
 		if top.CoreType == "" {
 			top.CoreType = coreType[logical]
 		}
-		out[int(coreID)] = top
+		out[id] = top
 	}
 	for id, top := range out {
 		sort.Ints(top.CPUs)

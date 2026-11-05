@@ -167,9 +167,9 @@ func (c *Collector) collectSystemInfo() SystemInfo {
 			case "processes":
 				si.Processes = v
 			case "procs_running":
-				si.ProcsRunning = clampInt(int64(v))
+				si.ProcsRunning = clampUintToInt(v)
 			case "procs_blocked":
-				si.ProcsBlocked = clampInt(int64(v))
+				si.ProcsBlocked = clampUintToInt(v)
 			}
 		}
 	}
